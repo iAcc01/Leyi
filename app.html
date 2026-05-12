@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>换物 Exchange · 真机预览</title>
+<title>换物 Exchange</title>
 <style>
 :root{
   --bg-page:#EFEDE7;
@@ -19,28 +19,28 @@
   --ink-4:#9C9A93;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{background:var(--bg-page);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased;height:100%;}
-body{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;}
+html,body{background:var(--bg-screen);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased;height:100%;margin:0;padding:0;}
+body{display:flex;flex-direction:column;min-height:100vh;}
 
-/* ============ iPhone 16 frame: 393x852 ============ */
+/* ============ 全屏页面容器 ============ */
 .device{
-  width:393px;height:852px;background:var(--bg-frame);
-  border-radius:55px;padding:12px;
-  box-shadow:0 1px 2px rgba(0,0,0,0.04),0 20px 60px rgba(0,0,0,0.12),inset 0 0 0 0.5px rgba(255,255,255,0.08);
+  width:100%;
+  height:100%;
+  background:var(--bg-screen);
   position:relative;
+  max-width:430px;
+  margin:0 auto;
 }
 .screen{
-  width:100%;height:100%;background:var(--bg-screen);
-  border-radius:44px;overflow:hidden;position:relative;
-  display:flex;flex-direction:column;
-}
-.notch{
-  position:absolute;left:50%;top:14px;transform:translateX(-50%);
-  width:120px;height:36px;background:#000;border-radius:999px;z-index:50;
+  width:100%;
+  height:100%;
+  background:var(--bg-screen);
+  display:flex;
+  flex-direction:column;
 }
 .statusbar{
   display:flex;justify-content:space-between;align-items:center;
-  padding:18px 32px 4px;font-size:14px;color:var(--ink);font-weight:600;
+  padding:16px 24px 8px;font-size:14px;color:var(--ink);font-weight:600;
   position:relative;z-index:5;
 }
 .statusbar .right{display:flex;gap:6px;align-items:center;}
@@ -327,7 +327,7 @@ body{display:flex;align-items:center;justify-content:center;min-height:100vh;pad
 <div class="device">
 <div class="screen">
 
-<div class="notch"></div>
+
 
 <!-- 状态栏 -->
 <div class="statusbar">
