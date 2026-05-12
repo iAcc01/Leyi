@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>换物 Exchange · 真机预览</title>
+<style>
+:root{
+  --bg-page:#EFEDE7;
+  --bg-frame:#1A1A1A;
+  --bg-screen:#FBFAF7;
+  --bg-card:#FFFFFF;
+  --bg-muted:#EAE6DA;
+  --line:rgba(0,0,0,0.08);
+  --line-soft:rgba(0,0,0,0.06);
+  --ink:#1A1A1A;
+  --ink-2:#73706A;
+  --ink-3:#A09D96;
+  --ink-4:#9C9A93;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--bg-page);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased;height:100%;}
+body{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;}
+
+/* ============ iPhone 16 frame: 393x852 ============ */
+.device{
+  width:393px;height:852px;background:var(--bg-frame);
+  border-radius:55px;padding:12px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.04),0 20px 60px rgba(0,0,0,0.12),inset 0 0 0 0.5px rgba(255,255,255,0.08);
+  position:relative;
+}
+.screen{
+  width:100%;height:100%;background:var(--bg-screen);
+  border-radius:44px;overflow:hidden;position:relative;
+  display:flex;flex-direction:column;
+}
+.notch{
+  position:absolute;left:50%;top:14px;transform:translateX(-50%);
+  width:120px;height:36px;background:#000;border-radius:999px;z-index:50;
+}
+.statusbar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:18px 32px 4px;font-size:14px;color:var(--ink);font-weight:600;
+  position:relative;z-index:5;
+}
+.statusbar .right{display:flex;gap:6px;align-items:center;}
+.statusbar svg{display:block;}
+
+.page{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+
+/* ============ Tabbar ============ */
+.tabbar{
+  border-top:0.5px solid var(--line);
+  background:rgba(251,250,247,0.94);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  padding:10px 18px 28px;
+  display:grid;grid-template-columns:repeat(5,1fr);align-items:center;
+}
+.tab{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:var(--ink-4);cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:color .2s;}
+.tab.act{color:var(--ink);font-weight:500;}
+.tab:active{opacity:0.6;}
+.ico{width:22px;height:22px;display:block;}
+.fab{width:42px;height:42px;background:var(--ink);border-radius:14px;display:flex;align-items:center;justify-content:center;border:3px solid var(--bg-screen);transition:transform .15s;}
+.fab:active{transform:scale(0.92);}
+
+/* ============ Common ============ */
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.scroll::-webkit-scrollbar{display:none;}
+.thumb{border-radius:14px;flex-shrink:0;position:relative;overflow:hidden;}
+.tag{font-size:11px;padding:4px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:4px;}
+.label{margin:0;font-size:14px;font-weight:500;color:var(--ink);letter-spacing:-0.1px;}
+.sub{margin:3px 0 0;font-size:12px;color:var(--ink-2);}
+.cap{font-size:11px;color:var(--ink-3);letter-spacing:0.5px;text-transform:uppercase;}
+.row{display:flex;gap:14px;padding:16px 0;border-bottom:0.5px solid var(--line-soft);align-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.row:last-child{border-bottom:none;}
+.row:active{opacity:0.65;}
+.eyebrow-en{font-size:11px;color:var(--ink-3);letter-spacing:1px;}
+.h1-cn{margin-top:6px;font-size:30px;font-weight:500;letter-spacing:-1px;}
+.icon-btn{width:38px;height:38px;border-radius:50%;background:white;border:0.5px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.icon-btn:active{transform:scale(0.92);}
+.divider-v{width:0.5px;background:var(--line);}
+.stat-card{background:white;border:0.5px solid var(--line);border-radius:18px;padding:18px;display:flex;justify-content:space-around;}
+.stat{text-align:center;}
+.stat .n{margin:0;font-size:22px;font-weight:500;letter-spacing:-0.5px;}
+.stat .l{margin:4px 0 0;font-size:11px;color:var(--ink-2);}
+.metric{flex:1;background:white;border:0.5px solid var(--line);border-radius:14px;padding:14px;}
+.metric .n{margin:0;font-size:20px;font-weight:500;}
+.metric .l{margin:4px 0 0;font-size:11px;color:var(--ink-2);}
+.medal{flex:1;background:white;border:0.5px solid var(--line);border-radius:14px;padding:12px 8px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s;}
+.medal:active{transform:scale(0.96);}
+.medal .name{margin:4px 0 0;font-size:11px;font-weight:500;}
+.menu-row{padding:16px 0;border-bottom:0.5px solid var(--line-soft);display:flex;justify-content:space-between;align-items:center;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.menu-row:last-child{border-bottom:none;}
+.menu-row:active{opacity:0.6;}
+.chev{color:var(--ink-3);}
+.tab-text{display:flex;gap:20px;font-size:13px;border-bottom:0.5px solid var(--line-soft);padding:0 22px;}
+.tab-text span{padding-bottom:12px;color:var(--ink-4);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.tab-text span.on{color:var(--ink);font-weight:500;border-bottom:1.5px solid var(--ink);margin-bottom:-1px;}
+.bigbtn{background:var(--ink);color:white;text-align:center;padding:16px;border-radius:14px;font-size:14.5px;font-weight:500;letter-spacing:0.5px;cursor:pointer;transition:transform .15s;-webkit-tap-highlight-color:transparent;}
+.bigbtn:active{transform:scale(0.98);opacity:0.92;}
+.bigbtn.outline{background:transparent;color:var(--ink);border:0.5px solid var(--ink);}
+.progress{width:48px;height:3px;background:rgba(0,0,0,0.08);border-radius:999px;position:relative;overflow:hidden;}
+.progress i{position:absolute;left:0;top:0;height:100%;background:var(--ink);border-radius:999px;}
+.avatar-grad{background:linear-gradient(135deg,var(--ink),#3A3A3A);}
+.avatar-amber{background:linear-gradient(135deg,#E8DCC4,#D4C4A0);color:#5A4A2A;}
+.avatar-mute{background:#D8D2C2;color:#5A4A2A;}
+.unread{position:absolute;right:-1px;bottom:-1px;width:14px;height:14px;background:var(--ink);border-radius:50%;border:2px solid var(--bg-screen);color:white;font-size:9px;font-weight:500;display:flex;align-items:center;justify-content:center;}
+.badge{font-size:10px;font-weight:400;color:var(--ink);background:var(--bg-muted);padding:2px 6px;border-radius:4px;margin-left:4px;}
+.badge-soft{font-size:10px;font-weight:400;color:var(--ink-2);margin-left:4px;}
+.profile-tag{font-size:10px;padding:3px 8px;background:var(--bg-muted);color:var(--ink);border-radius:4px;font-weight:500;}
+.right-meta{text-align:right;}
+.right-meta .km{margin:0;font-size:13px;font-weight:500;}
+.right-meta .walk{margin:2px 0 0;font-size:11px;color:var(--ink-3);}
+
+/* ============ Page transitions ============ */
+.page-view{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.page-view.active{display:flex;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+/* ============ Modal (publish + invite + medal detail) ============ */
+.modal-mask{
+  position:absolute;inset:0;background:rgba(0,0,0,0.4);
+  display:none;align-items:flex-end;justify-content:center;z-index:100;
+  animation:maskIn .25s ease;
+}
+.modal-mask.show{display:flex;}
+@keyframes maskIn{from{opacity:0;}to{opacity:1;}}
+.sheet{
+  background:var(--bg-screen);width:100%;border-radius:24px 24px 0 0;
+  max-height:90%;overflow:hidden;display:flex;flex-direction:column;
+  animation:sheetUp .3s cubic-bezier(0.32,0.72,0,1);
+}
+@keyframes sheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.sheet-handle{width:36px;height:4px;background:rgba(0,0,0,0.15);border-radius:999px;margin:10px auto 0;}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;}
+.sheet-body{padding:0 22px 18px;overflow-y:auto;}
+.sheet-body::-webkit-scrollbar{display:none;}
+.sheet-foot{padding:14px 22px 28px;border-top:0.5px solid var(--line-soft);}
+
+/* Header bar (for sub pages) */
+.navbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 22px 10px;
+}
+.back-btn{
+  width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.04);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.back-btn:active{opacity:0.6;}
+
+/* Hero image (item detail) */
+.hero-img{
+  height:280px;width:100%;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#E8DCC4,#D4C4A0);
+}
+.hero-img .obj{
+  position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);
+  width:120px;height:140px;background:#A88B5F;
+  border-radius:50% 50% 12px 12px / 60% 60% 12px 12px;
+}
+.hero-img .handle{
+  position:absolute;left:calc(50% + 50px);top:50%;transform:translateY(-50%);
+  width:28px;height:48px;border:8px solid #A88B5F;border-radius:50%;
+  border-left-color:transparent;
+}
+.hero-dots{
+  position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
+  display:flex;gap:5px;
+}
+.hero-dots i{width:5px;height:5px;background:rgba(255,255,255,0.5);border-radius:50%;display:block;}
+.hero-dots i.on{background:white;width:14px;border-radius:999px;}
+
+/* Toast */
+.toast{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  background:rgba(0,0,0,0.85);color:white;padding:14px 22px;
+  border-radius:14px;font-size:13px;z-index:200;
+  display:none;animation:toastIn .25s ease;
+}
+
+/* ============ View toggle (列表 / 瀑布) ============ */
+.view-toggle{
+  display:inline-flex;background:rgba(0,0,0,0.05);border-radius:10px;padding:2px;gap:2px;
+}
+.view-toggle .v{
+  width:30px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;color:var(--ink-3);transition:all .2s;
+}
+.view-toggle .v.on{background:white;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,0.05);}
+
+/* ============ 瀑布流 ============ */
+.masonry{
+  display:none;column-count:2;column-gap:10px;padding:14px 22px 14px;
+}
+.masonry.show{display:block;}
+.list-mode{display:block;}
+.list-mode.hidden{display:none;}
+.mcard{
+  break-inside:avoid;margin-bottom:10px;background:white;
+  border:0.5px solid var(--line);border-radius:14px;overflow:hidden;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s;
+}
+.mcard:active{transform:scale(0.98);}
+.mcover{position:relative;width:100%;overflow:hidden;}
+.mcover .ratio-tall{padding-bottom:130%;}
+.mcover .ratio-mid{padding-bottom:100%;}
+.mcover .ratio-short{padding-bottom:78%;}
+.mcover>.art{position:absolute;inset:0;}
+.mbody{padding:10px 12px 12px;}
+.mtitle{margin:0;font-size:13px;font-weight:500;letter-spacing:-0.1px;line-height:1.4;}
+.mwant{margin:4px 0 0;font-size:11px;color:var(--ink-2);}
+.muser{margin:8px 0 0;display:flex;align-items:center;gap:6px;}
+.muser .av{width:16px;height:16px;border-radius:50%;display:inline-block;}
+.muser .name{font-size:10.5px;color:var(--ink-2);}
+.muser .like{margin-left:auto;display:flex;align-items:center;gap:3px;font-size:10.5px;color:var(--ink-3);}
+.toast.show{display:block;}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,-40%);}to{opacity:1;transform:translate(-50%,-50%);}}
+
+/* ============ 通用工具类 ============ */
+.section-title{font-size:11px;color:var(--ink-3);letter-spacing:0.5px;text-transform:uppercase;padding:14px 22px 6px;}
+.card-block{background:white;border:0.5px solid var(--line);border-radius:14px;margin:0 22px 12px;overflow:hidden;}
+.like-btn{cursor:pointer;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center;gap:3px;}
+.like-btn.on svg{fill:var(--ink);stroke:var(--ink);}
+.like-btn.on{color:var(--ink);}
+
+/* 聊天页 */
+.chat-list{flex:1;overflow-y:auto;padding:14px 18px 14px;background:#F5F3EE;}
+.chat-list::-webkit-scrollbar{display:none;}
+.chat-day{text-align:center;font-size:10.5px;color:var(--ink-3);margin:6px 0 14px;}
+.bubble{max-width:74%;padding:10px 14px;border-radius:18px;font-size:13.5px;line-height:1.5;margin-bottom:8px;word-wrap:break-word;}
+.bubble.them{background:white;border-bottom-left-radius:6px;align-self:flex-start;color:var(--ink);}
+.bubble.me{background:var(--ink);color:white;border-bottom-right-radius:6px;align-self:flex-end;}
+.bubble-wrap{display:flex;flex-direction:column;margin-bottom:10px;}
+.bubble-wrap.right{align-items:flex-end;}
+.bubble-time{font-size:10px;color:var(--ink-3);margin-top:2px;}
+.item-ref{background:white;border:0.5px solid var(--line);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center;max-width:80%;align-self:flex-start;margin-bottom:10px;cursor:pointer;}
+.item-ref .mini{width:48px;height:48px;border-radius:10px;flex-shrink:0;position:relative;overflow:hidden;}
+.chat-input{background:rgba(251,250,247,0.96);backdrop-filter:blur(14px);border-top:0.5px solid var(--line);padding:10px 14px 28px;display:flex;align-items:center;gap:8px;}
+.chat-input .ipt{flex:1;background:white;border:0.5px solid var(--line);border-radius:18px;padding:10px 14px;font-size:13px;color:var(--ink-3);}
+.chat-send{width:36px;height:36px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;}
+.chat-tool{width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,0.04);display:flex;align-items:center;justify-content:center;}
+
+/* 地图全屏 */
+.map-full{position:absolute;inset:0;background:var(--bg-muted);}
+.map-card-strip{position:absolute;bottom:96px;left:0;right:0;display:flex;gap:10px;overflow-x:auto;padding:0 18px;-webkit-overflow-scrolling:touch;}
+.map-card-strip::-webkit-scrollbar{display:none;}
+.map-card{flex:0 0 230px;background:white;border:0.5px solid var(--line);border-radius:16px;padding:12px;display:flex;gap:10px;align-items:center;}
+.map-back{position:absolute;left:18px;top:20px;width:38px;height:38px;border-radius:50%;background:white;border:0.5px solid var(--line);display:flex;align-items:center;justify-content:center;z-index:10;cursor:pointer;}
+
+/* 我的物品 */
+.mine-card{background:white;border:0.5px solid var(--line);border-radius:14px;padding:12px;display:flex;gap:12px;margin-bottom:10px;}
+.mine-cover{width:72px;height:72px;border-radius:10px;flex-shrink:0;position:relative;overflow:hidden;}
+.mine-stat{font-size:10.5px;color:var(--ink-3);margin-top:6px;display:flex;gap:10px;}
+.mine-stat span{display:inline-flex;align-items:center;gap:3px;}
+.mine-act{display:flex;gap:6px;margin-top:8px;}
+.mine-act .btn{font-size:11px;padding:5px 12px;border-radius:999px;border:0.5px solid var(--line);background:white;cursor:pointer;}
+.mine-act .btn.primary{background:var(--ink);color:white;border-color:var(--ink);}
+
+/* 时间线 */
+.timeline{padding:6px 22px 20px;position:relative;}
+.timeline::before{content:'';position:absolute;left:32px;top:14px;bottom:14px;width:0.5px;background:var(--line);}
+.tline-item{position:relative;padding:10px 0 10px 30px;}
+.tline-dot{position:absolute;left:7px;top:18px;width:8px;height:8px;background:var(--ink);border-radius:50%;border:2px solid var(--bg-screen);box-shadow:0 0 0 1.5px var(--ink);}
+.tline-date{font-size:10.5px;color:var(--ink-3);margin-bottom:4px;}
+.tline-card{background:white;border:0.5px solid var(--line);border-radius:14px;padding:12px;display:flex;gap:10px;align-items:center;}
+
+/* 心愿单 */
+.wish-grid{padding:14px 22px 14px;display:flex;gap:8px;flex-wrap:wrap;}
+.wish-chip{padding:8px 14px;background:white;border:0.5px solid var(--line);border-radius:999px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.wish-chip.on{background:var(--ink);color:white;border-color:var(--ink);}
+.wish-chip .x{font-size:10px;opacity:0.6;}
+
+/* 设置 */
+.settings-group{background:white;border:0.5px solid var(--line);border-radius:14px;margin:0 22px 14px;overflow:hidden;}
+.set-row{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:0.5px solid var(--line-soft);font-size:13.5px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.set-row:last-child{border-bottom:none;}
+.set-row .meta{font-size:11.5px;color:var(--ink-3);display:flex;align-items:center;gap:4px;}
+.switch{width:36px;height:22px;background:rgba(0,0,0,0.1);border-radius:999px;position:relative;cursor:pointer;transition:background .2s;}
+.switch::after{content:'';position:absolute;left:2px;top:2px;width:18px;height:18px;background:white;border-radius:50%;transition:left .2s;box-shadow:0 1px 2px rgba(0,0,0,0.1);}
+.switch.on{background:var(--ink);}
+.switch.on::after{left:16px;}
+
+/* 通知 */
+.notif-item{padding:14px 22px;border-bottom:0.5px solid var(--line-soft);display:flex;gap:12px;align-items:flex-start;cursor:pointer;}
+.notif-icon{width:36px;height:36px;border-radius:10px;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* ============ 登录 / 注册 ============ */
+.welcome-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px;text-align:center;}
+.brand-logo{width:88px;height:88px;border-radius:24px;background:var(--ink);display:flex;align-items:center;justify-content:center;margin-bottom:28px;position:relative;}
+.brand-logo::before{content:'';position:absolute;inset:22px;border:2px solid white;border-radius:50% 50% 8px 8px / 60% 60% 8px 8px;}
+.brand-logo::after{content:'';position:absolute;right:18px;top:34px;width:12px;height:20px;border:3px solid white;border-radius:50%;border-left-color:transparent;}
+.welcome-title{font-size:36px;font-weight:500;letter-spacing:-1.2px;margin:0;}
+.welcome-sub{font-size:14px;color:var(--ink-2);margin:12px 0 0;line-height:1.8;}
+.welcome-eyebrow{font-size:11px;color:var(--ink-3);letter-spacing:2px;margin-bottom:14px;}
+.input-field{background:white;border:0.5px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.input-field input{flex:1;border:none;outline:none;font-size:14px;color:var(--ink);background:transparent;font-family:inherit;}
+.input-field input::placeholder{color:var(--ink-3);}
+.input-field .prefix{font-size:13px;color:var(--ink-2);padding-right:10px;border-right:0.5px solid var(--line);}
+.input-field .suffix{font-size:12px;color:var(--ink);font-weight:500;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:4px 10px;border-radius:8px;background:rgba(0,0,0,0.04);}
+.input-field .suffix.disabled{color:var(--ink-3);background:transparent;}
+.code-boxes{display:flex;gap:8px;justify-content:space-between;margin:8px 0 18px;}
+.code-boxes .box{flex:1;aspect-ratio:1;max-height:50px;background:white;border:0.5px solid var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;}
+.code-boxes .box.filled{border-color:var(--ink);}
+.code-boxes .box.active{border:1.5px solid var(--ink);}
+.oauth-row{display:flex;gap:14px;justify-content:center;margin-top:18px;}
+.oauth-btn{width:44px;height:44px;border-radius:50%;background:white;border:0.5px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s;}
+.oauth-btn:active{transform:scale(0.92);}
+.divider-text{display:flex;align-items:center;gap:12px;margin:20px 0 14px;color:var(--ink-3);font-size:11px;}
+.divider-text::before,.divider-text::after{content:'';flex:1;height:0.5px;background:var(--line);}
+.agree-row{display:flex;gap:8px;align-items:flex-start;font-size:11px;color:var(--ink-2);line-height:1.6;margin-top:16px;}
+.checkbox{width:14px;height:14px;border-radius:4px;border:1px solid var(--ink-3);flex-shrink:0;margin-top:2px;cursor:pointer;-webkit-tap-highlight-color:transparent;position:relative;}
+.checkbox.on{background:var(--ink);border-color:var(--ink);}
+.checkbox.on::after{content:'';position:absolute;left:3px;top:0px;width:4px;height:8px;border:solid white;border-width:0 1.5px 1.5px 0;transform:rotate(45deg);}
+.agree-row a{color:var(--ink);text-decoration:none;border-bottom:0.5px solid var(--ink);}
+.interest-grid{display:flex;gap:8px;flex-wrap:wrap;}
+.interest-chip{padding:8px 14px;background:white;border:0.5px solid var(--line);border-radius:999px;font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s;}
+.interest-chip.on{background:var(--ink);color:white;border-color:var(--ink);}
+.city-pick{background:white;border:0.5px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+
+
+</style>
+</head>
+<body>
+
+<!-- ===================== iPhone 16 真机壳 ===================== -->
+<div class="device">
+<div class="screen">
+
+<div class="notch"></div>
+
+<!-- 状态栏 -->
+<div class="statusbar">
+  <span>9:41</span>
+  <div class="right">
+    <svg width="17" height="11" viewBox="0 0 17 11" fill="#1A1A1A"><rect x="0" y="6" width="3" height="5" rx="0.5"/><rect x="4.5" y="4" width="3" height="7" rx="0.5"/><rect x="9" y="2" width="3" height="9" rx="0.5"/><rect x="13.5" y="0" width="3" height="11" rx="0.5"/></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="none"><path d="M8 2.5C5.5 2.5 3.3 3.5 1.7 5.1l1.4 1.4C4.4 5.2 6.1 4.5 8 4.5s3.6.7 4.9 2l1.4-1.4C12.7 3.5 10.5 2.5 8 2.5zM4.5 7.9l1.4 1.4c.6-.6 1.3-1 2.1-1s1.5.4 2.1 1l1.4-1.4C10.6 7 9.4 6.5 8 6.5s-2.6.5-3.5 1.4z" fill="#1A1A1A"/></svg>
+    <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3" stroke="#1A1A1A" stroke-opacity="0.4"/><rect x="2" y="2" width="16" height="8" rx="1.5" fill="#1A1A1A"/><rect x="22.5" y="4" width="1.5" height="4" rx="0.5" fill="#1A1A1A" fill-opacity="0.4"/></svg>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- ===================== 1. 广场页 ===================== -->
+<div class="page-view" data-page="square">
+  <div style="padding:14px 22px 14px;display:flex;justify-content:space-between;align-items:flex-end;">
+    <div>
+      <p class="eyebrow-en">EXCHANGE</p>
+      <p class="h1-cn">广场</p>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div class="view-toggle" id="viewToggle">
+        <div class="v on" data-view="list" title="列表">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </div>
+        <div class="v" data-view="masonry" title="瀑布流">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="6" rx="1.5"/><rect x="3" y="15" width="7" height="6" rx="1.5"/><rect x="14" y="11" width="7" height="10" rx="1.5"/></svg>
+        </div>
+      </div>
+      <div class="icon-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-text">
+    <span class="on">推荐</span>
+    <span>书籍</span>
+    <span>数码</span>
+    <span>手作</span>
+    <span>服饰</span>
+  </div>
+
+  <div class="scroll" id="squareScroll">
+
+  <!-- 列表模式 -->
+  <div class="list-mode" id="listMode" style="padding:6px 22px 14px;">
+    <div class="row" data-link="item">
+      <div class="thumb" style="width:64px;height:64px;background:linear-gradient(135deg,#E8DCC4,#D4C4A0);">
+        <div style="position:absolute;left:16px;top:20px;width:32px;height:38px;background:#A88B5F;border-radius:50% 50% 8px 8px / 60% 60% 8px 8px;"></div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p class="label">陶艺手作马克杯</p>
+        <p class="sub">想换 · 多肉植物 / 茶叶</p>
+        <div style="margin-top:8px;display:flex;gap:6px;align-items:center;">
+          <span style="width:18px;height:18px;border-radius:50%;background:#D9CDB5;display:inline-block;"></span>
+          <span style="font-size:11px;color:var(--ink-2);">阿衡</span>
+          <span style="width:2px;height:2px;background:var(--ink-3);border-radius:50%;"></span>
+          <span style="font-size:11px;color:var(--ink-3);">2 小时前</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="thumb" style="width:64px;height:64px;background:#1A1A1A;">
+        <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:32px;height:24px;background:#3A3A3A;border-radius:4px;"></div>
+        <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;background:#0A0A0A;border-radius:50%;border:2px solid #2C2C2A;"></div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p class="label">胶片相机 · 美能达 X-700</p>
+        <p class="sub">想换 · 黑胶唱片</p>
+        <div style="margin-top:8px;display:flex;gap:6px;align-items:center;">
+          <span style="width:18px;height:18px;border-radius:50%;background:#2C2C2A;display:inline-block;"></span>
+          <span style="font-size:11px;color:var(--ink-2);">林樾</span>
+          <span style="width:2px;height:2px;background:var(--ink-3);border-radius:50%;"></span>
+          <span style="font-size:11px;color:var(--ink-3);">5 小时前</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="thumb" style="width:64px;height:64px;background:#E8E2D5;">
+        <div style="position:absolute;left:14px;top:10px;width:36px;height:46px;background:#FBFAF7;border-radius:2px 4px 4px 2px;border-left:3px solid #8A6F4A;"></div>
+        <div style="position:absolute;left:22px;top:18px;width:22px;height:1.5px;background:#A09D96;"></div>
+        <div style="position:absolute;left:22px;top:24px;width:16px;height:1.5px;background:#A09D96;"></div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p class="label">绝版书《城南旧事》</p>
+        <p class="sub">想换 · 同价值文学书</p>
+        <div style="margin-top:8px;display:flex;gap:6px;align-items:center;">
+          <span style="width:18px;height:18px;border-radius:50%;background:#C5BFB0;display:inline-block;"></span>
+          <span style="font-size:11px;color:var(--ink-2);">山客</span>
+          <span style="width:2px;height:2px;background:var(--ink-3);border-radius:50%;"></span>
+          <span style="font-size:11px;color:var(--ink-3);">昨天 · 18:22</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="thumb" style="width:64px;height:64px;background:#D8D8D8;">
+        <div style="position:absolute;inset:14px;background:#1A1A1A;border-radius:6px;"></div>
+        <div style="position:absolute;left:20px;top:24px;width:24px;height:14px;background:#3A3A3A;border-radius:2px;"></div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p class="label">机械键盘 · 客制化</p>
+        <p class="sub">想换 · 显示器</p>
+        <div style="margin-top:8px;display:flex;gap:6px;align-items:center;">
+          <span style="width:18px;height:18px;border-radius:50%;background:#3A3A3A;display:inline-block;"></span>
+          <span style="font-size:11px;color:var(--ink-2);">键客</span>
+          <span style="width:2px;height:2px;background:var(--ink-3);border-radius:50%;"></span>
+          <span style="font-size:11px;color:var(--ink-3);">2 天前</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="thumb" style="width:64px;height:64px;background:#F0E5C8;">
+        <div style="position:absolute;left:18px;top:18px;width:28px;height:24px;background:#C9985E;border-radius:50%;"></div>
+        <div style="position:absolute;left:14px;top:30px;width:36px;height:18px;background:#A87A45;border-radius:0 0 8px 8px;"></div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p class="label">手冲咖啡套装</p>
+        <p class="sub">想换 · 茶具 / 咖啡豆</p>
+        <div style="margin-top:8px;display:flex;gap:6px;align-items:center;">
+          <span style="width:18px;height:18px;border-radius:50%;background:#C9985E;display:inline-block;"></span>
+          <span style="font-size:11px;color:var(--ink-2);">咖匠</span>
+          <span style="width:2px;height:2px;background:var(--ink-3);border-radius:50%;"></span>
+          <span style="font-size:11px;color:var(--ink-3);">3 天前</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /list-mode -->
+
+  <!-- 瀑布流模式 -->
+  <div class="masonry" id="masonryMode">
+
+    <!-- 卡 1：陶艺杯（高） -->
+    <div class="mcard" data-link="item">
+      <div class="mcover">
+        <div class="ratio-tall"></div>
+        <div class="art" style="background:linear-gradient(135deg,#E8DCC4,#D4C4A0);">
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:64px;height:74px;background:#A88B5F;border-radius:50% 50% 8px 8px / 60% 60% 8px 8px;"></div>
+          <div style="position:absolute;left:calc(50% + 26px);top:50%;transform:translateY(-50%);width:18px;height:32px;border:6px solid #A88B5F;border-radius:50%;border-left-color:transparent;"></div>
+        </div>
+      </div>
+      <div class="mbody">
+        <p class="mtitle">陶艺手作马克杯</p>
+        <p class="mwant">想换 · 多肉 / 茶叶</p>
+        <div class="muser">
+          <span class="av" style="background:#D9CDB5;"></span>
+          <span class="name">阿衡</span>
+          <span class="like">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+            12
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 卡 2：胶片相机（短） -->
+    <div class="mcard" data-link="item">
+      <div class="mcover">
+        <div class="ratio-short"></div>
+        <div class="art" style="background:#1A1A1A;">
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:62px;height:42px;background:#3A3A3A;border-radius:6px;"></div>
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:30px;height:30px;background:#0A0A0A;border-radius:50%;border:3px solid #2C2C2A;"></div>
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;background:#1F1F1F;border-radius:50%;"></div>
+          <div style="position:absolute;right:14px;top:14px;width:6px;height:6px;background:white;border-radius:50%;opacity:0.7;"></div>
+        </div>
+      </div>
+      <div class="mbody">
+        <p class="mtitle">胶片相机 · 美能达</p>
+        <p class="mwant">想换 · 黑胶唱片</p>
+        <div class="muser">
+          <span class="av" style="background:#2C2C2A;"></span>
+          <span class="name">林樾</span>
+          <span class="like">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+            38
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 卡 3：绝版书（中） -->
+    <div class="mcard" data-link="item">
+      <div class="mcover">
+        <div class="ratio-mid"></div>
+        <div class="art" style="background:#E8E2D5;">
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:60px;height:80px;background:#FBFAF7;border-radius:2px 6px 6px 2px;border-left:5px solid #8A6F4A;box-shadow:1px 2px 0 rgba(0,0,0,0.04);"></div>
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin-left:5px;width:36px;height:1.5px;background:#A09D96;margin-top:-22px;"></div>
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin-left:5px;width:28px;height:1.5px;background:#A09D96;margin-top:-14px;"></div>
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin-left:5px;width:20px;height:1.5px;background:#A09D96;margin-top:-6px;"></div>
+        </div>
+      </div>
+      <div class="mbody">
+        <p class="mtitle">《城南旧事》绝版</p>
+        <p class="mwant">想换 · 同价值文学</p>
+        <div class="muser">
+          <span class="av" style="background:#C5BFB0;"></span>
+          <span class="name">山客</span>
+          <span class="like">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+            7
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 卡 4：机械键盘（中） -->
+    <div class="mcard" data-link="item">
+      <div class="mcover">
+        <div class="ratio-mid"></div>
+        <div class="art" style="background:#D8D8D8;">
+          <div style="position:absolute;inset:18%;background:#1A1A1A;border-radius:8px;"></div>
+          <div style="position:absolute;left:30%;top:38%;width:40%;height:24%;background:#3A3A3A;border-radius:3px;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:3px;">
+            <span style="background:#1A1A1A;border-radius:1px;"></span>
+            <span style="background:#1A1A1A;border-radius:1px;"></span>
+            <span style="background:#1A1A1A;border-radius:1px;"></span>
+            <span style="background:#1A1A1A;border-radius:1px;"></span>
+            <span style="background:#1A1A1A;border-radius:1px;"></span>
+          </div>
+        </div>
+      </div>
+      <div class="mbody">
+        <p class="mtitle">机械键盘 · 客制化</p>
+        <p class="mwant">想换 · 显示器</p>
+        <div class="muser">
+          <span class="av" style="background:#3A3A3A;"></span>
+          <span class="name">键客</span>
+          <span class="like">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+            22
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 卡 5：咖啡套装（短） -->
+    <div class="mcard" data-link="item">
+      <div class="mcover">
+        <div class="ratio-short"></div>
+        <div class="art" style="background:#F0E5C8;">
+          <div style="position:absolute;left:50%;top:30%;transform:translateX(-50%);width:54px;height:30px;background:#C9985E;border-radius:50%;"></div>
+          <div style="position:absolute;left:50%;top:50%;transform:translateX(-50%);width:64px;height:36px;background:#A87A45;border-radius:0 0 14px 14px;"></div>
+        </div>
+      </div>
+      <div class="mbody">
+        <p class="mtitle">手冲咖啡套装</p>
+        <p class="mwant">想换 · 茶具 / 咖啡豆</p>
+        <div class="muser">
+          <span class="av" style="background:#C9985E;"></span>
+          <span class="name">咖匠</span>
+          <span class="like">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+            16
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 卡 6：古风耳坠（高） -->
+    <div class="mcard" data-link="item">
+      <div class="mcover">
+        <div class="ratio-tall"></div>
+        <div class="art" style="background:#F4DCE5;">
+          <div style="position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);width:24px;height:24px;background:#C5708A;border-radius:50%;"></div>
+          <div style="position:absolute;left:50%;top:30%;transform:translate(-50%,0);width:8px;height:46px;background:linear-gradient(180deg,#C5708A,#A8506A);"></div>
+          <div style="position:absolute;left:50%;top:calc(30% + 46px);transform:translate(-50%,0);width:18px;height:18px;background:#A8506A;border-radius:50%;"></div>
+        </div>
+      </div>
+      <div class="mbody">
+        <p class="mtitle">古风耳坠 · 手作</p>
+        <p class="mwant">想换 · 手工饰品</p>
+        <div class="muser">
+          <span class="av" style="background:#C5708A;"></span>
+          <span class="name">小禾</span>
+          <span class="like">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+            41
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 卡 7：多肉（短） -->
+    <div class="mcard" data-link="item">
+      <div class="mcover">
+        <div class="ratio-short"></div>
+        <div class="art" style="background:#E8F0E2;">
+          <div style="position:absolute;left:50%;bottom:18%;transform:translateX(-50%);width:60px;height:30px;background:#7A8B5A;border-radius:50% 50% 12px 12px;"></div>
+          <div style="position:absolute;left:50%;top:30%;transform:translateX(-50%);width:14px;height:36px;background:#5A6B3A;border-radius:50%;"></div>
+          <div style="position:absolute;left:calc(50% - 16px);top:38%;width:12px;height:28px;background:#6A7B4A;border-radius:50%;transform:rotate(-25deg);"></div>
+          <div style="position:absolute;left:calc(50% + 4px);top:38%;width:12px;height:28px;background:#6A7B4A;border-radius:50%;transform:rotate(25deg);"></div>
+        </div>
+      </div>
+      <div class="mbody">
+        <p class="mtitle">熊童子多肉</p>
+        <p class="mwant">想换 · 陶杯 / 花器</p>
+        <div class="muser">
+          <span class="av" style="background:#7A8B5A;"></span>
+          <span class="name">阿青</span>
+          <span class="like">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+            29
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 卡 8：黑胶唱片（中） -->
+    <div class="mcard" data-link="item">
+      <div class="mcover">
+        <div class="ratio-mid"></div>
+        <div class="art" style="background:#2A2520;">
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:80%;padding-bottom:80%;background:#0A0A0A;border-radius:50%;"></div>
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:54%;padding-bottom:54%;background:radial-gradient(circle,#1A1A1A 30%,#3A3A3A 31%,#1A1A1A 32%,#3A3A3A 33%,#1A1A1A 34%);border-radius:50%;"></div>
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:24%;padding-bottom:24%;background:#A87A45;border-radius:50%;"></div>
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:6%;padding-bottom:6%;background:#1A1A1A;border-radius:50%;"></div>
+        </div>
+      </div>
+      <div class="mbody">
+        <p class="mtitle">黑胶 · 邓丽君精选</p>
+        <p class="mwant">想换 · 老胶片相机</p>
+        <div class="muser">
+          <span class="av" style="background:#3A3A3A;"></span>
+          <span class="name">老唱</span>
+          <span class="like">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+            53
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- /masonry -->
+
+  </div><!-- /scroll -->
+</div>
+
+<!-- ===================== 2. 本地页 ===================== -->
+<div class="page-view" data-page="local">
+  <div style="padding:14px 22px 12px;display:flex;justify-content:space-between;align-items:flex-end;">
+    <div>
+      <p class="eyebrow-en">NEARBY · 1.5 KM</p>
+      <p class="h1-cn">本地</p>
+    </div>
+    <div class="icon-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+    </div>
+  </div>
+
+  <div class="scroll" style="padding:0 22px 14px;">
+    <div style="height:240px;background:var(--bg-muted);border-radius:18px;position:relative;overflow:hidden;border:0.5px solid var(--line-soft);">
+      <svg width="100%" height="100%" viewBox="0 0 320 240" preserveAspectRatio="none" style="position:absolute;inset:0;">
+        <path d="M0 100 L80 70 L160 120 L240 80 L320 110" stroke="#D9D3C2" stroke-width="26" fill="none" stroke-linecap="round"/>
+        <path d="M50 0 L70 120 L50 240" stroke="#D9D3C2" stroke-width="16" fill="none"/>
+        <path d="M0 170 L150 160 L260 190 L320 180" stroke="#D9D3C2" stroke-width="16" fill="none" stroke-linecap="round"/>
+        <rect x="180" y="20" width="80" height="50" rx="4" fill="#DED7C5"/>
+        <rect x="240" y="120" width="60" height="40" rx="4" fill="#DED7C5"/>
+        <rect x="20" y="190" width="50" height="35" rx="4" fill="#DED7C5"/>
+      </svg>
+      <div style="position:absolute;left:30%;top:38%;display:flex;flex-direction:column;align-items:center;">
+        <div style="width:36px;height:36px;background:white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:1.5px solid var(--ink);display:flex;align-items:center;justify-content:center;">
+          <span style="transform:rotate(45deg);font-size:12px;font-weight:500;">3</span>
+        </div>
+      </div>
+      <div style="position:absolute;left:60%;top:55%;width:16px;height:16px;background:var(--ink);border-radius:50%;border:3px solid white;box-shadow:0 0 0 1px rgba(0,0,0,0.1);"></div>
+      <div style="position:absolute;left:48%;top:28%;width:12px;height:12px;background:white;border-radius:50%;border:2px solid var(--ink);"></div>
+      <div style="position:absolute;left:75%;top:45%;width:12px;height:12px;background:white;border-radius:50%;border:2px solid var(--ink);"></div>
+      <div style="position:absolute;bottom:14px;left:14px;background:white;padding:8px 12px;border-radius:10px;font-size:11.5px;font-weight:500;border:0.5px solid var(--line);">附近 12 件</div>
+      <div data-link="map" style="position:absolute;top:14px;right:14px;width:36px;height:36px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;border:0.5px solid var(--line);cursor:pointer;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin:18px 0 4px;">
+      <span class="cap">附近物品</span>
+      <span style="font-size:11.5px;color:var(--ink);">距离 ↑</span>
+    </div>
+
+    <div class="row">
+      <div class="thumb" style="width:54px;height:54px;border-radius:12px;background:#F0E5C8;">
+        <div style="position:absolute;left:14px;top:14px;width:26px;height:20px;background:#C9985E;border-radius:50%;"></div>
+      </div>
+      <div style="flex:1;">
+        <p class="label">手冲咖啡套装</p>
+        <p class="sub">换 · 茶具 / 咖啡豆</p>
+      </div>
+      <div class="right-meta">
+        <p class="km">800 m</p>
+        <p class="walk">步行 10 分</p>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="thumb" style="width:54px;height:54px;border-radius:12px;background:#D8E0E8;">
+        <div style="position:absolute;left:16px;bottom:12px;width:22px;height:10px;background:#5A6B7A;border-radius:4px 4px 0 0;"></div>
+        <div style="position:absolute;left:12px;bottom:8px;width:10px;height:10px;background:#3A4A5A;border-radius:50%;"></div>
+        <div style="position:absolute;right:12px;bottom:8px;width:10px;height:10px;background:#3A4A5A;border-radius:50%;"></div>
+      </div>
+      <div style="flex:1;">
+        <p class="label">儿童滑板车</p>
+        <p class="sub">换 · 绘本 / 玩具</p>
+      </div>
+      <div class="right-meta">
+        <p class="km">同小区</p>
+        <p class="walk">3 号楼</p>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="thumb" style="width:54px;height:54px;border-radius:12px;background:#F4DCE5;">
+        <div style="position:absolute;left:18px;top:12px;width:18px;height:18px;background:#C5708A;border-radius:50%;"></div>
+        <div style="position:absolute;left:24px;top:30px;width:6px;height:14px;background:#C5708A;"></div>
+      </div>
+      <div style="flex:1;">
+        <p class="label">古风耳坠</p>
+        <p class="sub">换 · 手工饰品</p>
+      </div>
+      <div class="right-meta">
+        <p class="km">1.2 km</p>
+        <p class="walk">骑车 5 分</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 3. 消息页 ===================== -->
+<div class="page-view" data-page="message">
+  <div style="padding:14px 22px 14px;">
+    <p class="eyebrow-en">MESSAGES</p>
+    <p class="h1-cn">消息</p>
+  </div>
+
+  <div style="padding:0 22px 14px;display:flex;gap:8px;">
+    <div class="metric" data-link="invite" style="cursor:pointer;"><p class="n">3</p><p class="l">换物邀请</p></div>
+    <div class="metric" data-link="notif" style="cursor:pointer;"><p class="n">2</p><p class="l">系统通知</p></div>
+    <div class="metric"><p class="n">5</p><p class="l">点赞收藏</p></div>
+  </div>
+
+  <div style="padding:0 22px 8px;"><span class="cap">私聊</span></div>
+
+  <div class="scroll" style="padding:0 22px 14px;">
+    <div class="row" data-link="chat">
+      <div class="avatar-amber" style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex-shrink:0;position:relative;">青
+        <div class="unread">2</div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;">
+          <p class="label">阿青<span class="badge">邀请</span></p>
+          <span style="font-size:11px;color:var(--ink-3);">10:32</span>
+        </div>
+        <p class="sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">想用我的多肉换你的杯子，可以面交</p>
+      </div>
+    </div>
+    <div class="row" data-link="chat">
+      <div class="avatar-grad" style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:white;flex-shrink:0;">樾</div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;">
+          <p class="label">林樾<span class="badge">交换中</span></p>
+          <span style="font-size:11px;color:var(--ink-3);">昨天</span>
+        </div>
+        <p class="sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">明天下午地铁站见？</p>
+      </div>
+    </div>
+    <div class="row" data-link="chat">
+      <div class="avatar-mute" style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex-shrink:0;">客</div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;">
+          <p class="label">山客<span class="badge-soft">✓ 已成</span></p>
+          <span style="font-size:11px;color:var(--ink-3);">3 天前</span>
+        </div>
+        <p class="sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">交换成功，期待下次缘分</p>
+      </div>
+    </div>
+    <div class="row" data-link="chat">
+      <div class="avatar-mute" style="width:48px;height:48px;border-radius:50%;background:#C2D5C5;color:#2A4A3A;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex-shrink:0;">禾</div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;">
+          <p class="label">小禾</p>
+          <span style="font-size:11px;color:var(--ink-3);">上周</span>
+        </div>
+        <p class="sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">谢谢，那本书我很喜欢</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 4. 我的页 ===================== -->
+<div class="page-view" data-page="me">
+  <div class="scroll" style="padding:24px 22px 14px;">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+      <div class="avatar-grad" style="width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;color:white;font-weight:500;font-size:18px;letter-spacing:-0.5px;">阿衡</div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <p style="margin:0;font-size:20px;font-weight:500;letter-spacing:-0.3px;">阿衡</p>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#1A1A1A"><path d="M12 2L9 6 4 7l3 5-1 6 6-3 6 3-1-6 3-5-5-1z"/></svg>
+        </div>
+        <p style="margin:4px 0 0;font-size:12px;color:var(--ink-2);">坐标杭州 · 加入 8 个月</p>
+        <div style="margin-top:8px;display:flex;gap:6px;">
+          <span class="profile-tag">手作爱好者</span>
+          <span class="profile-tag">咖啡师</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card" style="margin-bottom:18px;">
+      <div class="stat"><p class="n">8</p><p class="l">在换</p></div>
+      <div class="divider-v"></div>
+      <div class="stat"><p class="n">12</p><p class="l">已成交</p></div>
+      <div class="divider-v"></div>
+      <div class="stat"><p class="n">36</p><p class="l">收藏</p></div>
+    </div>
+
+    <span class="cap">勋章 · 3</span>
+    <div style="margin-top:10px;display:flex;gap:10px;margin-bottom:18px;">
+      <div class="medal" data-link="medal">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="#1A1A1A"><circle cx="12" cy="9" r="6"/><path d="M8 14l-2 8 6-3 6 3-2-8"/></svg>
+        <p class="name">守信者</p>
+      </div>
+      <div class="medal" data-link="medal">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="#1A1A1A"><path d="M12 2L4 7v10l8 5 8-5V7z"/></svg>
+        <p class="name">环保家</p>
+      </div>
+      <div class="medal" data-link="medal">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.6"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <p class="name">良缘人</p>
+      </div>
+    </div>
+
+    <div class="menu-row" data-link="mine"><span>我的物品</span><span style="display:flex;align-items:center;gap:6px;color:var(--ink-2);font-size:12px;">8<svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></span></div>
+    <div class="menu-row" data-link="history"><span>交换记录</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></div>
+    <div class="menu-row" data-link="wish"><span>心愿单</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></div>
+    <div class="menu-row" data-link="settings"><span>设置</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></div>
+  </div>
+</div>
+
+<!-- ===================== 子页 A. 物品详情 ===================== -->
+<div class="page-view" data-page="item">
+  <div class="navbar">
+    <div class="back-btn" data-back>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg>
+    </div>
+    <span style="font-size:14px;font-weight:500;">物品详情</span>
+    <div class="back-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+    </div>
+  </div>
+
+  <div class="scroll">
+    <div class="hero-img">
+      <div class="obj"></div>
+      <div class="hero-dots"><i class="on"></i><i></i><i></i></div>
+    </div>
+
+    <div style="padding:20px 22px 14px;">
+      <p style="margin:0;font-size:22px;font-weight:500;letter-spacing:-0.5px;">陶艺手作马克杯</p>
+      <p style="margin:6px 0 0;font-size:13px;color:var(--ink-2);line-height:1.6;">景德镇手拉坯，使用半年，无瑕疵。咖啡党的日常，因为搬家所以想找新主人。</p>
+
+      <div style="margin-top:16px;display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="tag" style="background:var(--bg-muted);color:var(--ink);">家居</span>
+        <span class="tag" style="background:var(--bg-muted);color:var(--ink);">手作</span>
+        <span class="tag" style="background:var(--bg-muted);color:var(--ink);">陶瓷</span>
+      </div>
+    </div>
+
+    <div style="padding:0 22px 14px;">
+      <div style="background:white;border:0.5px solid var(--line);border-radius:16px;padding:16px;">
+        <p class="cap">想换什么</p>
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="tag" style="background:var(--ink);color:white;">多肉植物</span>
+          <span class="tag" style="background:var(--ink);color:white;">手冲茶</span>
+          <span class="tag" style="background:var(--ink);color:white;">同价值书籍</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:0 22px 14px;">
+      <div style="background:white;border:0.5px solid var(--line);border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer;" data-link="me">
+        <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#E8DCC4,#D4C4A0);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:#5A4A2A;">阿衡</div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:14px;font-weight:500;">阿衡</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="#1A1A1A"><path d="M12 2L9 6 4 7l3 5-1 6 6-3 6 3-1-6 3-5-5-1z"/></svg>
+          </div>
+          <p style="margin:3px 0 0;font-size:11.5px;color:var(--ink-2);">已交换 12 次 · 守信者</p>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A09D96" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+    </div>
+
+    <div style="padding:0 22px 14px;">
+      <p class="cap">交换详情</p>
+      <div style="margin-top:10px;font-size:13px;line-height:2;color:var(--ink-2);">
+        <div style="display:flex;justify-content:space-between;"><span>交换方式</span><span style="color:var(--ink);">见面 · 同城</span></div>
+        <div style="display:flex;justify-content:space-between;"><span>所在位置</span><span style="color:var(--ink);">杭州 · 西湖区</span></div>
+        <div style="display:flex;justify-content:space-between;"><span>使用情况</span><span style="color:var(--ink);">9 成新</span></div>
+        <div style="display:flex;justify-content:space-between;"><span>发布时间</span><span style="color:var(--ink);">2 小时前</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:14px 22px 28px;border-top:0.5px solid var(--line-soft);background:rgba(251,250,247,0.94);backdrop-filter:blur(16px);display:flex;gap:10px;">
+    <div class="back-btn" style="width:48px;height:48px;border-radius:14px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.6"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+    </div>
+    <div class="bigbtn" style="flex:1;" data-link="invite">发起换物</div>
+  </div>
+</div>
+
+<!-- ===================== 子页 B. 交换邀请确认 ===================== -->
+<div class="page-view" data-page="invite">
+  <div class="navbar">
+    <div class="back-btn" data-back>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg>
+    </div>
+    <span style="font-size:14px;font-weight:500;">换物邀请</span>
+    <div style="width:36px;"></div>
+  </div>
+
+  <div class="scroll" style="padding:14px 22px 14px;">
+    <p class="eyebrow-en">EXCHANGE REQUEST</p>
+    <p style="margin:6px 0 0;font-size:24px;font-weight:500;letter-spacing:-0.6px;">两件物品<br/>正在等待相遇</p>
+
+    <!-- 双向卡片 -->
+    <div style="margin-top:24px;background:white;border:0.5px solid var(--line);border-radius:18px;padding:18px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div class="thumb" style="width:72px;height:72px;background:linear-gradient(135deg,#E8DCC4,#D4C4A0);">
+          <div style="position:absolute;left:18px;top:22px;width:36px;height:42px;background:#A88B5F;border-radius:50% 50% 8px 8px / 60% 60% 8px 8px;"></div>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <p class="cap">TA 的</p>
+          <p style="margin:6px 0 0;font-size:14px;font-weight:500;">陶艺手作马克杯</p>
+          <p style="margin:3px 0 0;font-size:11.5px;color:var(--ink-2);">阿衡 · 杭州</p>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:center;padding:14px 0;">
+        <div style="flex:1;height:0.5px;background:var(--line-soft);"></div>
+        <div style="width:36px;height:36px;border:1px solid var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.6" stroke-linecap="round"><path d="M7 10h10M7 10l4-4M17 14H7M17 14l-4 4"/></svg>
+        </div>
+        <div style="flex:1;height:0.5px;background:var(--line-soft);"></div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div class="thumb" style="width:72px;height:72px;background:#E8F0E2;">
+          <div style="position:absolute;left:50%;bottom:16px;transform:translateX(-50%);width:36px;height:18px;background:#7A8B5A;border-radius:50% 50% 8px 8px;"></div>
+          <div style="position:absolute;left:50%;top:18px;transform:translateX(-50%);width:8px;height:24px;background:#5A6B3A;border-radius:50%;"></div>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <p class="cap">我的</p>
+          <p style="margin:6px 0 0;font-size:14px;font-weight:500;">熊童子多肉 · 已养 1 年</p>
+          <p style="margin:3px 0 0;font-size:11.5px;color:var(--ink-2);">点击切换 ›</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;background:white;border:0.5px solid var(--line);border-radius:16px;padding:16px;">
+      <p class="cap">留言给阿衡</p>
+      <p style="margin:10px 0 0;font-size:13px;line-height:1.7;color:var(--ink);">想换你的杯子，多肉养得很好，有花苞了。希望咱们能在万塘路地铁站见面。</p>
+    </div>
+
+    <div style="margin-top:16px;background:white;border:0.5px solid var(--line);border-radius:16px;padding:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="cap">建议交换方式</span>
+        <span style="font-size:12px;font-weight:500;">见面 ›</span>
+      </div>
+      <div style="margin-top:14px;padding:12px;background:#FAF7F0;border-radius:10px;display:flex;gap:10px;align-items:center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.6"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        <span style="flex:1;font-size:12px;">万塘路地铁 D 出口 · 距双方约 800m</span>
+      </div>
+    </div>
+
+    <p style="margin-top:18px;font-size:11px;color:var(--ink-3);line-height:1.7;text-align:center;">发起后双方可在消息中协商时间地点<br/>"换物" 不收取任何手续费</p>
+  </div>
+
+  <div style="padding:14px 22px 28px;border-top:0.5px solid var(--line-soft);display:flex;gap:10px;">
+    <div class="bigbtn outline" style="flex:1;" data-back>再想想</div>
+    <div class="bigbtn" style="flex:1.5;" data-action="invite-confirm">发起邀请</div>
+  </div>
+</div>
+
+<!-- ===================== 子页 C. 信誉勋章详情 ===================== -->
+<div class="page-view" data-page="medal">
+  <div class="navbar">
+    <div class="back-btn" data-back>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg>
+    </div>
+    <span style="font-size:14px;font-weight:500;">信誉勋章</span>
+    <div style="width:36px;"></div>
+  </div>
+
+  <div class="scroll" style="padding:14px 22px 14px;">
+    <div style="text-align:center;padding:18px 0 24px;">
+      <div style="width:120px;height:120px;margin:0 auto;border-radius:50%;background:linear-gradient(135deg,var(--ink),#3A3A3A);display:flex;align-items:center;justify-content:center;border:6px solid var(--bg-muted);">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="9" r="6"/><path d="M8 14l-2 8 6-3 6 3-2-8"/></svg>
+      </div>
+      <p style="margin:18px 0 0;font-size:24px;font-weight:500;letter-spacing:-0.5px;">守信者</p>
+      <p style="margin:6px 0 0;font-size:12px;color:var(--ink-2);">在 12 次交换中从未爽约</p>
+    </div>
+
+    <div style="background:white;border:0.5px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;">
+      <p class="cap">达成进度</p>
+      <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:baseline;">
+        <span style="font-size:13px;color:var(--ink-2);">守约次数</span>
+        <span style="font-size:18px;font-weight:500;">12<span style="font-size:12px;color:var(--ink-3);"> / 10</span></span>
+      </div>
+      <div style="margin-top:10px;width:100%;height:6px;background:rgba(0,0,0,0.06);border-radius:999px;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0 0 0 0;width:100%;background:var(--ink);border-radius:999px;"></div>
+      </div>
+      <p style="margin:10px 0 0;font-size:11px;color:var(--ink-3);">已超额完成达成条件</p>
+    </div>
+
+    <div style="background:white;border:0.5px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;">
+      <p class="cap">勋章特权</p>
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:flex-start;padding:8px 0;">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.6"><path d="M12 2L4 7v10l8 5 8-5V7z"/></svg>
+        </div>
+        <div style="flex:1;">
+          <p style="margin:0;font-size:13px;font-weight:500;">广场曝光 +20%</p>
+          <p style="margin:3px 0 0;font-size:11.5px;color:var(--ink-2);">你的物品在推荐流中获得更多展示机会</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:0.5px solid var(--line-soft);">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <div style="flex:1;">
+          <p style="margin:0;font-size:13px;font-weight:500;">个人主页认证标识</p>
+          <p style="margin:3px 0 0;font-size:11.5px;color:var(--ink-2);">名字旁显示守信者徽标，提升信任感</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:white;border:0.5px solid var(--line);border-radius:16px;padding:16px;">
+      <p class="cap">勋章故事</p>
+      <p style="margin:10px 0 0;font-size:13px;line-height:1.8;color:var(--ink-2);">"约定的时间，是两个人之间最朴素的信任。每一次准时赴约，都是为这个信任增添一寸厚度。"</p>
+      <p style="margin:14px 0 0;font-size:11px;color:var(--ink-3);text-align:right;">— 换物 · 第 12 周</p>
+    </div>
+  </div>
+
+  <div style="padding:14px 22px 28px;border-top:0.5px solid var(--line-soft);">
+    <div class="bigbtn" data-back>知道了</div>
+  </div>
+</div>
+
+<!-- ===================== 子页 D. 聊天会话 ===================== -->
+<div class="page-view" data-page="chat">
+  <div class="navbar" style="background:rgba(251,250,247,0.94);backdrop-filter:blur(14px);border-bottom:0.5px solid var(--line-soft);">
+    <div class="back-btn" data-back>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#E8DCC4,#D4C4A0);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:#5A4A2A;">青</div>
+      <div>
+        <p style="margin:0;font-size:14px;font-weight:500;">阿青</p>
+        <p style="margin:1px 0 0;font-size:10px;color:var(--ink-3);">在线 · 杭州</p>
+      </div>
+    </div>
+    <div class="back-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+    </div>
+  </div>
+
+  <div class="chat-list">
+    <div class="chat-day">今天 · 10:24</div>
+
+    <div class="bubble-wrap"><div class="bubble them">你的杯子真好看，是哪窑的？</div><span class="bubble-time">10:24</span></div>
+
+    <div class="bubble-wrap right"><div class="bubble me">景德镇手拉坯的，自己常用</div><span class="bubble-time">10:25</span></div>
+
+    <div class="bubble-wrap"><div class="bubble them">想用我家多肉换，可以面交</div></div>
+
+    <div class="item-ref" data-link="item">
+      <div class="mini" style="background:#E8F0E2;">
+        <div style="position:absolute;left:50%;bottom:10px;transform:translateX(-50%);width:28px;height:14px;background:#7A8B5A;border-radius:50% 50% 6px 6px;"></div>
+        <div style="position:absolute;left:50%;top:10px;transform:translateX(-50%);width:6px;height:18px;background:#5A6B3A;border-radius:50%;"></div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p style="margin:0;font-size:12.5px;font-weight:500;">熊童子多肉 · 已养 1 年</p>
+        <p style="margin:3px 0 0;font-size:11px;color:var(--ink-2);">想换 · 陶杯 / 花器</p>
+      </div>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A09D96" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
+    </div>
+
+    <div class="bubble-wrap right"><div class="bubble me">多肉养得好，明天下午有空？</div><span class="bubble-time">10:28</span></div>
+
+    <div class="bubble-wrap"><div class="bubble them">嗯嗯，地铁万塘路 D 口，3 点行吗</div></div>
+
+    <div class="bubble-wrap right">
+      <div class="bubble me" style="background:white;color:var(--ink);border:0.5px solid var(--line);">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <div>
+            <p style="margin:0;font-size:12.5px;font-weight:500;">5 月 12 日 周二 · 15:00</p>
+            <p style="margin:2px 0 0;font-size:11px;color:var(--ink-2);">万塘路地铁站 D 出口</p>
+          </div>
+        </div>
+      </div>
+      <span class="bubble-time">10:32</span>
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <div class="chat-tool">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+    <div class="ipt">说点什么…</div>
+    <div class="chat-tool">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="6" r="1.5"/><circle cx="12" cy="18" r="1.5"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 子页 E. 地图全屏 ===================== -->
+<div class="page-view" data-page="map">
+  <div class="map-back" data-back>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg>
+  </div>
+  <div style="position:absolute;top:20px;right:18px;display:flex;flex-direction:column;gap:10px;z-index:10;">
+    <div class="back-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    </div>
+    <div class="back-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M22 12h-3M5 12H2"/></svg>
+    </div>
+  </div>
+
+  <div class="map-full">
+    <svg width="100%" height="100%" viewBox="0 0 393 852" preserveAspectRatio="none" style="position:absolute;inset:0;">
+      <path d="M0 200 L100 160 L200 240 L300 180 L393 220" stroke="#D9D3C2" stroke-width="38" fill="none" stroke-linecap="round"/>
+      <path d="M60 0 L90 400 L60 852" stroke="#D9D3C2" stroke-width="22" fill="none"/>
+      <path d="M0 480 L180 460 L320 510 L393 490" stroke="#D9D3C2" stroke-width="22" fill="none" stroke-linecap="round"/>
+      <path d="M280 0 L290 380 L300 650 L280 852" stroke="#D9D3C2" stroke-width="20" fill="none"/>
+      <rect x="150" y="40" width="80" height="60" rx="6" fill="#DED7C5"/>
+      <rect x="240" y="280" width="70" height="50" rx="6" fill="#DED7C5"/>
+      <rect x="30" y="380" width="60" height="50" rx="6" fill="#DED7C5"/>
+      <rect x="180" y="560" width="90" height="60" rx="6" fill="#DED7C5"/>
+      <rect x="320" y="700" width="60" height="50" rx="6" fill="#DED7C5"/>
+    </svg>
+    <!-- 标记点 -->
+    <div style="position:absolute;left:32%;top:30%;display:flex;flex-direction:column;align-items:center;">
+      <div style="width:40px;height:40px;background:white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:1.5px solid var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+        <span style="transform:rotate(45deg);font-size:13px;font-weight:500;">5</span>
+      </div>
+    </div>
+    <div style="position:absolute;left:62%;top:55%;width:18px;height:18px;background:var(--ink);border-radius:50%;border:3px solid white;box-shadow:0 0 0 1.5px rgba(0,0,0,0.1);"></div>
+    <div style="position:absolute;left:48%;top:42%;width:14px;height:14px;background:white;border-radius:50%;border:2.5px solid var(--ink);"></div>
+    <div style="position:absolute;left:28%;top:62%;width:14px;height:14px;background:white;border-radius:50%;border:2.5px solid var(--ink);"></div>
+    <div style="position:absolute;left:72%;top:35%;width:14px;height:14px;background:white;border-radius:50%;border:2.5px solid var(--ink);"></div>
+  </div>
+
+  <div class="map-card-strip">
+    <div class="map-card" data-link="item">
+      <div class="mine-cover" style="width:54px;height:54px;background:#F0E5C8;">
+        <div style="position:absolute;left:14px;top:14px;width:26px;height:20px;background:#C9985E;border-radius:50%;"></div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p style="margin:0;font-size:13px;font-weight:500;">手冲咖啡套装</p>
+        <p style="margin:2px 0 0;font-size:11px;color:var(--ink-2);">800 m · 咖匠</p>
+      </div>
+    </div>
+    <div class="map-card">
+      <div class="mine-cover" style="width:54px;height:54px;background:#D8E0E8;">
+        <div style="position:absolute;left:16px;bottom:12px;width:22px;height:10px;background:#5A6B7A;border-radius:4px 4px 0 0;"></div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p style="margin:0;font-size:13px;font-weight:500;">儿童滑板车</p>
+        <p style="margin:2px 0 0;font-size:11px;color:var(--ink-2);">同小区 · 林樾</p>
+      </div>
+    </div>
+    <div class="map-card">
+      <div class="mine-cover" style="width:54px;height:54px;background:#F4DCE5;">
+        <div style="position:absolute;left:18px;top:12px;width:18px;height:18px;background:#C5708A;border-radius:50%;"></div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p style="margin:0;font-size:13px;font-weight:500;">古风耳坠</p>
+        <p style="margin:2px 0 0;font-size:11px;color:var(--ink-2);">1.2 km · 小禾</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 子页 F. 我的物品 ===================== -->
+<div class="page-view" data-page="mine">
+  <div class="navbar">
+    <div class="back-btn" data-back>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg>
+    </div>
+    <span style="font-size:14px;font-weight:500;">我的物品</span>
+    <div class="back-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+  </div>
+
+  <div class="tab-text" style="padding:0 22px;">
+    <span class="on">在换 · 8</span>
+    <span>已下架 · 4</span>
+    <span>草稿 · 1</span>
+  </div>
+
+  <div class="scroll" style="padding:14px 22px 14px;">
+    <div class="mine-card">
+      <div class="mine-cover" style="background:linear-gradient(135deg,#E8DCC4,#D4C4A0);">
+        <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:36px;height:42px;background:#A88B5F;border-radius:50% 50% 8px 8px / 60% 60% 8px 8px;"></div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <p style="margin:0;font-size:13.5px;font-weight:500;">陶艺手作马克杯</p>
+          <span class="badge" style="margin-left:0;">推荐中</span>
+        </div>
+        <p style="margin:3px 0 0;font-size:11.5px;color:var(--ink-2);">想换 · 多肉植物 / 茶叶</p>
+        <div class="mine-stat">
+          <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/></svg> 248</span>
+          <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg> 12</span>
+          <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5z"/></svg> 3</span>
+        </div>
+        <div class="mine-act">
+          <div class="btn">编辑</div>
+          <div class="btn">下架</div>
+          <div class="btn primary">推广</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mine-card">
+      <div class="mine-cover" style="background:#F0E5C8;">
+        <div style="position:absolute;left:50%;top:36%;transform:translateX(-50%);width:32px;height:18px;background:#C9985E;border-radius:50%;"></div>
+        <div style="position:absolute;left:50%;top:60%;transform:translateX(-50%);width:40px;height:22px;background:#A87A45;border-radius:0 0 10px 10px;"></div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p style="margin:0;font-size:13.5px;font-weight:500;">手冲咖啡套装</p>
+        <p style="margin:3px 0 0;font-size:11.5px;color:var(--ink-2);">想换 · 茶具 / 咖啡豆</p>
+        <div class="mine-stat">
+          <span>浏览 86</span>
+          <span>收藏 4</span>
+        </div>
+        <div class="mine-act">
+          <div class="btn">编辑</div>
+          <div class="btn">下架</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mine-card">
+      <div class="mine-cover" style="background:#E8F0E2;">
+        <div style="position:absolute;left:50%;bottom:14px;transform:translateX(-50%);width:36px;height:18px;background:#7A8B5A;border-radius:50% 50% 8px 8px;"></div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p style="margin:0;font-size:13.5px;font-weight:500;">熊童子多肉</p>
+        <p style="margin:3px 0 0;font-size:11.5px;color:var(--ink-2);">想换 · 陶杯 / 花器</p>
+        <div class="mine-stat">
+          <span>浏览 142</span>
+          <span>收藏 9</span>
+          <span>邀请 1</span>
+        </div>
+        <div class="mine-act">
+          <div class="btn">编辑</div>
+          <div class="btn">下架</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:14px 22px 28px;border-top:0.5px solid var(--line-soft);background:rgba(251,250,247,0.94);">
+    <div class="bigbtn" data-action="open-publish">发布新物品</div>
+  </div>
+</div>
+
+<!-- ===================== 子页 G. 交换记录 ===================== -->
+<div class="page-view" data-page="history">
+  <div class="navbar">
+    <div class="back-btn" data-back>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg>
+    </div>
+    <span style="font-size:14px;font-weight:500;">交换记录</span>
+    <div style="width:36px;"></div>
+  </div>
+
+  <div style="padding:6px 22px 14px;display:flex;gap:8px;">
+    <div class="metric"><p class="n">12</p><p class="l">已成交</p></div>
+    <div class="metric"><p class="n">3</p><p class="l">进行中</p></div>
+    <div class="metric"><p class="n">2</p><p class="l">已取消</p></div>
+  </div>
+
+  <div class="scroll">
+    <div class="timeline">
+      <div class="tline-item">
+        <div class="tline-dot"></div>
+        <p class="tline-date">2026 · 5 · 10 已成</p>
+        <div class="tline-card">
+          <div class="mine-cover" style="width:48px;height:48px;background:#E8E2D5;">
+            <div style="position:absolute;left:10px;top:6px;width:28px;height:36px;background:#FBFAF7;border-radius:2px 4px 4px 2px;border-left:3px solid #8A6F4A;"></div>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <p style="margin:0;font-size:12.5px;font-weight:500;">绝版书 ↔ 散文集 · 山客</p>
+            <p style="margin:3px 0 0;font-size:10.5px;color:var(--ink-3);">同城面交 · 5 月 10 日</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tline-item">
+        <div class="tline-dot" style="background:white;box-shadow:0 0 0 1.5px var(--ink);"></div>
+        <p class="tline-date">2026 · 5 · 11 进行中</p>
+        <div class="tline-card">
+          <div class="mine-cover" style="width:48px;height:48px;background:linear-gradient(135deg,#E8DCC4,#D4C4A0);">
+            <div style="position:absolute;left:14px;top:14px;width:20px;height:24px;background:#A88B5F;border-radius:50% 50% 6px 6px / 60% 60% 6px 6px;"></div>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <p style="margin:0;font-size:12.5px;font-weight:500;">陶艺杯 ↔ 多肉 · 阿青<span class="badge">待面交</span></p>
+            <p style="margin:3px 0 0;font-size:10.5px;color:var(--ink-3);">明日 15:00 · 万塘路地铁站</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tline-item">
+        <div class="tline-dot"></div>
+        <p class="tline-date">2026 · 4 · 22 已成</p>
+        <div class="tline-card">
+          <div class="mine-cover" style="width:48px;height:48px;background:#F0E5C8;">
+            <div style="position:absolute;left:14px;top:14px;width:20px;height:18px;background:#C9985E;border-radius:50%;"></div>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <p style="margin:0;font-size:12.5px;font-weight:500;">咖啡器 ↔ 茶具 · 林樾</p>
+            <p style="margin:3px 0 0;font-size:10.5px;color:var(--ink-3);">同城面交 · 4 月 22 日</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tline-item">
+        <div class="tline-dot"></div>
+        <p class="tline-date">2026 · 4 · 8 已成</p>
+        <div class="tline-card">
+          <div class="mine-cover" style="width:48px;height:48px;background:#FBEAF0;">
+            <div style="position:absolute;left:14px;top:14px;width:20px;height:20px;background:#D4537E;border-radius:6px;"></div>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <p style="margin:0;font-size:12.5px;font-weight:500;">明信片 ↔ 香水小样 · 小禾</p>
+            <p style="margin:3px 0 0;font-size:10.5px;color:var(--ink-3);">快递寄送 · 4 月 8 日</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tline-item">
+        <div class="tline-dot" style="background:rgba(0,0,0,0.15);box-shadow:0 0 0 1.5px rgba(0,0,0,0.15);"></div>
+        <p class="tline-date">2026 · 3 · 30 已取消</p>
+        <div class="tline-card" style="opacity:0.55;">
+          <div class="mine-cover" style="width:48px;height:48px;background:#D8D8D8;">
+            <div style="position:absolute;inset:14px;background:#A09D96;border-radius:4px;"></div>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <p style="margin:0;font-size:12.5px;font-weight:500;">耳机 ↔ 充电宝 · 老张</p>
+            <p style="margin:3px 0 0;font-size:10.5px;color:var(--ink-3);">对方未到 · 已退还</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 子页 H. 心愿单 ===================== -->
+<div class="page-view" data-page="wish">
+  <div class="navbar">
+    <div class="back-btn" data-back>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg>
+    </div>
+    <span style="font-size:14px;font-weight:500;">心愿单</span>
+    <div class="back-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+  </div>
+
+  <div class="scroll">
+    <div style="padding:14px 22px 6px;">
+      <p class="eyebrow-en">WISHLIST · 3</p>
+      <p style="margin:6px 0 0;font-size:22px;font-weight:500;letter-spacing:-0.5px;">缘分会找到，<br/>你心里念着的东西</p>
+      <p style="margin:8px 0 0;font-size:12px;color:var(--ink-2);line-height:1.6;">系统会为你优先推送匹配的物品，也会在他人发布相关物品时通知你</p>
+    </div>
+
+    <p class="section-title">我在等</p>
+    <div class="wish-grid">
+      <div class="wish-chip on">老胶片相机 <span class="x">×</span></div>
+      <div class="wish-chip on">黑胶唱片 <span class="x">×</span></div>
+      <div class="wish-chip on">手作陶罐 <span class="x">×</span></div>
+      <div class="wish-chip">+ 添加</div>
+    </div>
+
+    <p class="section-title">大家在找</p>
+    <div class="wish-grid">
+      <div class="wish-chip">多肉植物</div>
+      <div class="wish-chip">绝版书</div>
+      <div class="wish-chip">机械键盘</div>
+      <div class="wish-chip">古着衣物</div>
+      <div class="wish-chip">手冲茶</div>
+      <div class="wish-chip">钢笔</div>
+    </div>
+
+    <div class="card-block" style="margin-top:14px;padding:16px;">
+      <p class="cap">最近匹配</p>
+      <div style="margin-top:10px;display:flex;gap:10px;align-items:center;cursor:pointer;" data-link="item">
+        <div class="mine-cover" style="width:48px;height:48px;background:#2A2520;">
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:80%;padding-bottom:80%;background:#0A0A0A;border-radius:50%;"></div>
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:24%;padding-bottom:24%;background:#A87A45;border-radius:50%;"></div>
+        </div>
+        <div style="flex:1;">
+          <p style="margin:0;font-size:13px;font-weight:500;">黑胶 · 邓丽君精选</p>
+          <p style="margin:3px 0 0;font-size:11px;color:var(--ink-2);">匹配「黑胶唱片」 · 老唱</p>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A09D96" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 子页 I. 系统通知 ===================== -->
+<div class="page-view" data-page="notif">
+  <div class="navbar">
+    <div class="back-btn" data-back>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg>
+    </div>
+    <span style="font-size:14px;font-weight:500;">系统通知</span>
+    <span style="font-size:12px;color:var(--ink-2);cursor:pointer;" data-action="read-all">全部已读</span>
+  </div>
+
+  <div class="scroll">
+    <div class="notif-item">
+      <div class="notif-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#1A1A1A"><circle cx="12" cy="9" r="6"/><path d="M8 14l-2 8 6-3 6 3-2-8"/></svg>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p style="margin:0;font-size:13px;font-weight:500;">你获得了「守信者」勋章</p>
+        <p style="margin:3px 0 0;font-size:11.5px;color:var(--ink-2);line-height:1.5;">在 12 次交换中从未爽约，今日由换物送上</p>
+        <p style="margin:6px 0 0;font-size:10.5px;color:var(--ink-3);">今天 10:32</p>
+      </div>
+    </div>
+
+    <div class="notif-item">
+      <div class="notif-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p style="margin:0;font-size:13px;font-weight:500;">心愿匹配：黑胶唱片</p>
+        <p style="margin:3px 0 0;font-size:11.5px;color:var(--ink-2);line-height:1.5;">老唱发布了《邓丽君精选》黑胶，1.5 km</p>
+        <p style="margin:6px 0 0;font-size:10.5px;color:var(--ink-3);">昨天 18:22</p>
+      </div>
+    </div>
+
+    <div class="notif-item">
+      <div class="notif-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p style="margin:0;font-size:13px;font-weight:500;">交换已完成 · 与山客</p>
+        <p style="margin:3px 0 0;font-size:11.5px;color:var(--ink-2);line-height:1.5;">《城南旧事》↔《沈从文散文集》已成交，去评价</p>
+        <p style="margin:6px 0 0;font-size:10.5px;color:var(--ink-3);">5 月 10 日</p>
+      </div>
+    </div>
+
+    <div class="notif-item">
+      <div class="notif-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p style="margin:0;font-size:13px;font-weight:500;">「换物」社区公约更新</p>
+        <p style="margin:3px 0 0;font-size:11.5px;color:var(--ink-2);line-height:1.5;">新增见面安全提示，请抽时间了解</p>
+        <p style="margin:6px 0 0;font-size:10.5px;color:var(--ink-3);">5 月 8 日</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 子页 J. 设置 ===================== -->
+<div class="page-view" data-page="settings">
+  <div class="navbar">
+    <div class="back-btn" data-back>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg>
+    </div>
+    <span style="font-size:14px;font-weight:500;">设置</span>
+    <div style="width:36px;"></div>
+  </div>
+
+  <div class="scroll" style="padding-top:8px;">
+    <p class="section-title">账号</p>
+    <div class="settings-group">
+      <div class="set-row"><span>个人资料</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></div>
+      <div class="set-row"><span>实名认证</span><span class="meta">已认证<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2"><path d="m9 12 2 2 4-4"/></svg></span></div>
+      <div class="set-row"><span>所在城市</span><span class="meta">杭州 · 西湖区</span></div>
+    </div>
+
+    <p class="section-title">通知</p>
+    <div class="settings-group">
+      <div class="set-row"><span>新邀请提醒</span><div class="switch on" data-switch></div></div>
+      <div class="set-row"><span>心愿匹配提醒</span><div class="switch on" data-switch></div></div>
+      <div class="set-row"><span>系统消息</span><div class="switch on" data-switch></div></div>
+      <div class="set-row"><span>免打扰时段</span><span class="meta">22:00 – 8:00</span></div>
+    </div>
+
+    <p class="section-title">隐私与安全</p>
+    <div class="settings-group">
+      <div class="set-row"><span>位置精度</span><span class="meta">街道级</span></div>
+      <div class="set-row"><span>屏蔽用户</span><span class="meta">0</span></div>
+      <div class="set-row"><span>账号注销</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></div>
+    </div>
+
+    <p class="section-title">关于</p>
+    <div class="settings-group">
+      <div class="set-row"><span>社区公约</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></div>
+      <div class="set-row"><span>意见反馈</span><svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></div>
+      <div class="set-row"><span>版本</span><span class="meta">v1.0.0</span></div>
+    </div>
+
+    <div style="padding:6px 22px 28px;">
+      <div class="bigbtn outline" data-action="logout">退出登录</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 子页 K. 欢迎页 ===================== -->
+<div class="page-view active" data-page="welcome">
+  <div class="welcome-hero">
+    <div class="brand-logo"></div>
+    <p class="welcome-eyebrow">EXCHANGE</p>
+    <h1 class="welcome-title">换物</h1>
+    <p class="welcome-sub">万物有缘，旧物新主<br/>不论价格，只论缘分</p>
+  </div>
+  <div style="padding:0 32px 28px;">
+    <div class="bigbtn" data-link="login">开始使用</div>
+    <p style="text-align:center;font-size:11.5px;color:var(--ink-3);margin-top:14px;cursor:pointer;" data-link="login">已有账号 · 直接登录</p>
+  </div>
+</div>
+
+<!-- ===================== 子页 L. 登录页 ===================== -->
+<div class="page-view" data-page="login">
+  <div class="navbar">
+    <div class="back-btn" data-back>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg>
+    </div>
+    <span style="font-size:14px;font-weight:500;"></span>
+    <div style="width:36px;"></div>
+  </div>
+
+  <div class="scroll" style="padding:8px 28px 14px;">
+    <p class="eyebrow-en">LOGIN</p>
+    <p style="margin:8px 0 0;font-size:26px;font-weight:500;letter-spacing:-0.8px;">欢迎来到换物</p>
+    <p style="margin:8px 0 28px;font-size:13px;color:var(--ink-2);line-height:1.7;">输入手机号，开启你的换物之旅</p>
+
+    <div class="input-field">
+      <span class="prefix">+86</span>
+      <input type="tel" placeholder="请输入手机号" value="138 8888 8888" />
+    </div>
+
+    <div class="input-field">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A09D96" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <input type="text" placeholder="验证码" />
+      <span class="suffix" data-action="send-code">获取验证码</span>
+    </div>
+
+    <div style="margin-top:20px;">
+      <div class="bigbtn" data-action="login-confirm">登录 / 注册</div>
+    </div>
+
+    <div class="agree-row">
+      <div class="checkbox on" data-toggle-agree></div>
+      <span>已阅读并同意<a>《用户协议》</a>和<a>《隐私政策》</a>，未注册手机号将自动创建账号</span>
+    </div>
+
+    <div class="divider-text">其他方式登录</div>
+
+    <div class="oauth-row">
+      <div class="oauth-btn" title="微信">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#1A1A1A"><path d="M8.5 5C4.9 5 2 7.5 2 10.5c0 1.7 1 3.3 2.5 4.3L4 17l2.5-1.3c.6.2 1.3.3 2 .3.2 0 .4 0 .5-.1-.1-.4-.2-.8-.2-1.2 0-2.9 2.9-5.3 6.5-5.3.2 0 .4 0 .6.1C15.3 7 12.2 5 8.5 5zm-2 3.3a.9.9 0 1 1 0-1.8.9.9 0 0 1 0 1.8zm4 0a.9.9 0 1 1 0-1.8.9.9 0 0 1 0 1.8z"/><path d="M22 14.5c0-2.5-2.5-4.5-5.5-4.5s-5.5 2-5.5 4.5c0 2.5 2.5 4.5 5.5 4.5.6 0 1.2-.1 1.7-.2L20.5 20l-.4-1.6c1.2-.8 2-2 1.9-3.4v-.5zm-7-.7a.7.7 0 1 1 0-1.4.7.7 0 0 1 0 1.4zm3.5 0a.7.7 0 1 1 0-1.4.7.7 0 0 1 0 1.4z"/></svg>
+      </div>
+      <div class="oauth-btn" title="Apple">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#1A1A1A"><path d="M17.05 12.04c-.03-2.82 2.3-4.17 2.4-4.24-1.31-1.92-3.35-2.18-4.07-2.21-1.73-.18-3.38 1.02-4.26 1.02-.89 0-2.24-1-3.69-.97-1.9.03-3.65 1.1-4.62 2.8-1.97 3.42-.5 8.47 1.41 11.24.94 1.36 2.05 2.87 3.5 2.82 1.4-.06 1.94-.91 3.64-.91 1.69 0 2.18.91 3.67.88 1.51-.03 2.47-1.38 3.4-2.74 1.07-1.58 1.51-3.12 1.53-3.2-.03-.02-2.93-1.12-2.91-4.49zM14.26 4.02c.77-.93 1.28-2.22 1.14-3.51-1.1.05-2.43.73-3.23 1.66-.71.82-1.34 2.14-1.17 3.4 1.23.1 2.48-.62 3.26-1.55z"/></svg>
+      </div>
+      <div class="oauth-btn" title="手机号">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.6"><rect x="6" y="2" width="12" height="20" rx="3"/><circle cx="12" cy="18" r="1" fill="#1A1A1A"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 子页 M. 注册补全页 ===================== -->
+<div class="page-view" data-page="register">
+  <div class="navbar">
+    <div class="back-btn" data-back>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"><path d="m15 6-6 6 6 6"/></svg>
+    </div>
+    <span style="font-size:14px;font-weight:500;"></span>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span style="font-size:10px;color:var(--ink-3);">2/2</span>
+      <div class="progress"><i style="width:100%;"></i></div>
+    </div>
+  </div>
+
+  <div class="scroll" style="padding:8px 28px 14px;">
+    <p class="eyebrow-en">SET UP</p>
+    <p style="margin:8px 0 0;font-size:26px;font-weight:500;letter-spacing:-0.8px;">让大家认识你</p>
+    <p style="margin:8px 0 28px;font-size:13px;color:var(--ink-2);line-height:1.7;">这些信息会出现在你的物品卡上</p>
+
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="width:72px;height:72px;margin:0 auto;border-radius:50%;background:linear-gradient(135deg,#E8DCC4,#D4C4A0);display:flex;align-items:center;justify-content:center;color:#5A4A2A;font-size:20px;font-weight:500;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;">
+        衡
+        <div style="position:absolute;right:-4px;bottom:-4px;width:26px;height:26px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;border:3px solid var(--bg-screen);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M9 5l1.5-2h3L15 5"/></svg>
+        </div>
+      </div>
+      <p style="margin:10px 0 0;font-size:11.5px;color:var(--ink-3);">点击上传头像</p>
+    </div>
+
+    <p class="cap" style="padding-left:4px;">昵称</p>
+    <div class="input-field" style="margin-top:8px;">
+      <input type="text" placeholder="想被大家怎么称呼" value="阿衡" />
+      <span style="font-size:10.5px;color:var(--ink-3);">2/12</span>
+    </div>
+
+    <p class="cap" style="padding-left:4px;margin-top:14px;">所在城市</p>
+    <div class="city-pick" style="margin-top:8px;">
+      <span style="display:flex;align-items:center;gap:8px;font-size:14px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.6"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        杭州 · 西湖区
+      </span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A09D96" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
+    </div>
+
+    <p class="cap" style="padding-left:4px;margin-top:14px;">我的兴趣 · 至少选 3 个</p>
+    <div class="interest-grid" style="margin-top:10px;">
+      <div class="interest-chip on">手作</div>
+      <div class="interest-chip on">咖啡</div>
+      <div class="interest-chip">读书</div>
+      <div class="interest-chip on">陶艺</div>
+      <div class="interest-chip">植物</div>
+      <div class="interest-chip">黑胶</div>
+      <div class="interest-chip">摄影</div>
+      <div class="interest-chip">复古</div>
+      <div class="interest-chip">数码</div>
+      <div class="interest-chip">旅行</div>
+    </div>
+  </div>
+
+  <div style="padding:12px 28px 28px;border-top:0.5px solid var(--line-soft);">
+    <div class="bigbtn" data-action="register-confirm">进入换物</div>
+  </div>
+</div>
+
+</div><!-- /.page -->
+
+<!-- ===================== Tab Bar (常驻) ===================== -->
+<div class="tabbar" id="mainTab">
+  <div class="tab act" data-go="square">
+    <svg class="ico tab-ico" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="18" r="2.5"/></svg>
+    广场
+  </div>
+  <div class="tab" data-go="local">
+    <svg class="ico tab-ico" viewBox="0 0 24 24"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+    本地
+  </div>
+  <div class="tab" data-action="open-publish" style="margin-top:-6px;">
+    <div class="fab">
+      <svg width="16" height="16" viewBox="0 0 24 24" stroke="white" stroke-width="2.4" fill="none" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+  </div>
+  <div class="tab" data-go="message" style="position:relative;">
+    <svg class="ico tab-ico" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5z"/></svg>
+    <div style="position:absolute;top:-2px;right:18px;width:8px;height:8px;background:var(--ink);border-radius:50%;border:1.5px solid var(--bg-screen);"></div>
+    消息
+  </div>
+  <div class="tab" data-go="me">
+    <svg class="ico tab-ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+    我的
+  </div>
+</div>
+
+<!-- ===================== 发布 Sheet ===================== -->
+<div class="modal-mask" id="publishMask">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <span style="font-size:13px;color:var(--ink-2);cursor:pointer;" data-close>取消</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;color:var(--ink-3);">2/3</span>
+        <div class="progress"><i style="width:66%;"></i></div>
+      </div>
+      <span style="font-size:13px;color:var(--ink);font-weight:500;">下一步</span>
+    </div>
+
+    <div class="sheet-body">
+      <p class="eyebrow-en">PUBLISH</p>
+      <p style="margin:6px 0 14px;font-size:24px;font-weight:500;letter-spacing:-0.6px;">让旧物，<br/>遇见新主人</p>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;">
+        <div style="aspect-ratio:1;background:linear-gradient(135deg,#E8DCC4,#D4C4A0);border-radius:12px;position:relative;overflow:hidden;">
+          <div style="position:absolute;left:30%;top:35%;width:36%;height:42%;background:#A88B5F;border-radius:50% 50% 8px 8px / 60% 60% 8px 8px;"></div>
+          <div style="position:absolute;left:6px;top:6px;background:white;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:500;">封面</div>
+        </div>
+        <div style="aspect-ratio:1;background:#EAE0CA;border-radius:12px;position:relative;overflow:hidden;">
+          <div style="position:absolute;inset:25%;background:#B89A6B;border-radius:50%;"></div>
+        </div>
+        <div style="aspect-ratio:1;background:transparent;border-radius:12px;border:1px dashed rgba(0,0,0,0.18);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--ink-4);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M9 5l1.5-2h3L15 5"/></svg>
+          <span style="font-size:11px;">添加</span>
+        </div>
+      </div>
+
+      <div style="padding:14px 0;border-bottom:0.5px solid var(--line-soft);">
+        <p class="eyebrow-en">物品名称</p>
+        <p style="margin:8px 0 0;font-size:14.5px;font-weight:500;">陶艺手作马克杯</p>
+        <p style="margin:4px 0 0;font-size:12px;color:var(--ink-2);">景德镇手拉坯，使用半年，无瑕疵</p>
+      </div>
+
+      <div style="padding:14px 0;border-bottom:0.5px solid var(--line-soft);display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <p class="eyebrow-en">分类</p>
+          <p style="margin:8px 0 0;font-size:13px;font-weight:500;">家居 · 手作</p>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A09D96" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+
+      <div style="padding:14px 0;">
+        <p class="eyebrow-en" style="margin-bottom:10px;">想换什么</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="tag" style="background:var(--ink);color:white;">多肉植物
+            <svg width="10" height="10" viewBox="0 0 24 24" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </span>
+          <span class="tag" style="background:var(--ink);color:white;">手冲茶
+            <svg width="10" height="10" viewBox="0 0 24 24" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </span>
+          <span class="tag" style="background:transparent;border:0.5px dashed rgba(0,0,0,0.2);color:var(--ink-4);">+ 添加心愿</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet-foot">
+      <div class="bigbtn" data-action="publish-done">发布到广场</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== Toast ===================== -->
+<div class="toast" id="toast">操作成功</div>
+
+</div><!-- /.screen -->
+</div><!-- /.device -->
+
+<script>
+(function(){
+  const screen = document.querySelector('.screen');
+  const pages = document.querySelectorAll('.page-view');
+  const tabs = document.querySelectorAll('#mainTab .tab[data-go]');
+  const tabbar = document.getElementById('mainTab');
+  const publishMask = document.getElementById('publishMask');
+  const toast = document.getElementById('toast');
+
+  // 4 个主 tab
+  const mainPages = ['square','local','message','me'];
+  // 登录注册流：这些页面不显示 tab 栏
+  const authPages = ['welcome','login','register'];
+  const stack = ['welcome'];
+
+  function setTabActive(name){
+    tabs.forEach(t=>{
+      const isAct = t.dataset.go===name;
+      t.classList.toggle('act', isAct);
+      const ic = t.querySelector('.tab-ico');
+      if(ic){
+        ic.setAttribute('fill', isAct?'#1A1A1A':'none');
+        ic.setAttribute('stroke', isAct?'none':'#9C9A93');
+        ic.setAttribute('stroke-width','1.6');
+      }
+    });
+  }
+
+  function go(name, push){
+    pages.forEach(p=>p.classList.toggle('active', p.dataset.page===name));
+    if(mainPages.includes(name)){
+      tabbar.style.display='grid';
+      setTabActive(name);
+      if(stack[stack.length-1]!==name) stack.length=0, stack.push(name);
+    } else {
+      tabbar.style.display='none';
+      if(push!==false) stack.push(name);
+    }
+    screen.querySelector('.scroll')?.scrollTo({top:0});
+  }
+
+  function back(){
+    if(stack.length>1){
+      stack.pop();
+      const prev = stack[stack.length-1];
+      go(prev, false);
+    } else {
+      go('square');
+    }
+  }
+
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(()=>toast.classList.remove('show'), 1600);
+  }
+
+  // tab 切换
+  tabs.forEach(t=>{
+    t.addEventListener('click', ()=>go(t.dataset.go));
+  });
+
+  // 全局事件代理
+  document.addEventListener('click', (e)=>{
+    const linkEl = e.target.closest('[data-link]');
+    if(linkEl){ go(linkEl.dataset.link); return; }
+
+    const backEl = e.target.closest('[data-back]');
+    if(backEl){ back(); return; }
+
+    const actionEl = e.target.closest('[data-action]');
+    if(actionEl){
+      const a = actionEl.dataset.action;
+      if(a==='open-publish'){
+        publishMask.classList.add('show');
+        tabbar.style.display='none';          // 发布弹层打开，隐藏底部 tab 栏
+      }
+      else if(a==='publish-done'){
+        publishMask.classList.remove('show');
+        // 回到原 Tab 页（由 go/stack 维护的 currentPage），恢复 tab 栏
+        const current = stack[stack.length-1];
+        if(mainPages.includes(current)) tabbar.style.display='grid';
+        showToast('已发布到广场 · 善缘已起');
+      }
+      else if(a==='invite-confirm'){
+        showToast('邀请已发出 · 静待回音');
+        setTimeout(()=>go('message'), 800);
+      }
+      return;
+    }
+
+    if(e.target.closest('[data-close]')){
+      publishMask.classList.remove('show');
+      const current = stack[stack.length-1];
+      if(mainPages.includes(current)) tabbar.style.display='grid';
+    }
+    if(e.target===publishMask){
+      publishMask.classList.remove('show');
+      const current = stack[stack.length-1];
+      if(mainPages.includes(current)) tabbar.style.display='grid';
+    }
+  });
+
+  // 初始化 —— 未登录状态，停在欢迎页，隐藏底部 tab 栏
+  setTabActive('square');
+  tabbar.style.display='none';
+
+  // 广场视图切换（列表 / 瀑布流）
+  const viewToggle = document.getElementById('viewToggle');
+  const listMode = document.getElementById('listMode');
+  const masonryMode = document.getElementById('masonryMode');
+  if(viewToggle){
+    viewToggle.addEventListener('click', (e)=>{
+      const v = e.target.closest('.v');
+      if(!v) return;
+      viewToggle.querySelectorAll('.v').forEach(x=>x.classList.remove('on'));
+      v.classList.add('on');
+      const mode = v.dataset.view;
+      if(mode==='list'){
+        listMode.classList.remove('hidden');
+        masonryMode.classList.remove('show');
+      } else {
+        listMode.classList.add('hidden');
+        masonryMode.classList.add('show');
+      }
+    });
+  }
+
+  // 设置开关切换
+  document.addEventListener('click', (e)=>{
+    const sw = e.target.closest('[data-switch]');
+    if(sw){ sw.classList.toggle('on'); }
+  });
+
+  // 心愿单 chip 切换
+  document.addEventListener('click', (e)=>{
+    const chip = e.target.closest('.wish-chip');
+    if(chip && !chip.textContent.includes('+ 添加')){
+      chip.classList.toggle('on');
+    }
+  });
+
+  // 顶部 tab-text 段切换（推荐/书籍 等）
+  document.addEventListener('click', (e)=>{
+    const seg = e.target.closest('.tab-text span');
+    if(seg){
+      const wrap = seg.parentElement;
+      wrap.querySelectorAll('span').forEach(s=>s.classList.remove('on'));
+      seg.classList.add('on');
+    }
+  });
+
+  // 全部已读 / 退出登录 等业务动作
+  const extraActions = {
+    'read-all': '通知已全部标记为已读'
+  };
+  document.addEventListener('click', (e)=>{
+    const el = e.target.closest('[data-action]');
+    if(!el) return;
+    const a = el.dataset.action;
+    if(extraActions[a]){ showToast(extraActions[a]); return; }
+
+    // 登录 / 注册 流程
+    if(a==='send-code'){
+      showToast('验证码已发送 · 60s 后可重发');
+      const suffix = el;
+      suffix.textContent = '60s';
+      suffix.classList.add('disabled');
+      let n = 60;
+      const timer = setInterval(()=>{
+        n--;
+        if(n<=0){ clearInterval(timer); suffix.textContent = '重新获取'; suffix.classList.remove('disabled'); }
+        else suffix.textContent = n + 's';
+      }, 1000);
+    }
+    else if(a==='login-confirm'){
+      // 新用户 → 去补全；老用户可直接进广场。此处演示走补全流程
+      showToast('登录成功 · 补全资料');
+      setTimeout(()=>{ stack.length=0; stack.push('register'); go('register', false); }, 500);
+    }
+    else if(a==='register-confirm'){
+      showToast('欢迎加入换物 · 善缘已起');
+      setTimeout(()=>{
+        // 进入主应用，栈重置为 square
+        stack.length=0;
+        go('square');
+      }, 600);
+    }
+    else if(a==='logout'){
+      showToast('已退出登录');
+      setTimeout(()=>{
+        stack.length=0;
+        stack.push('welcome');
+        go('welcome', false);
+        tabbar.style.display='none';
+      }, 500);
+    }
+  });
+
+  // 同意协议 checkbox
+  document.addEventListener('click', (e)=>{
+    const cb = e.target.closest('[data-toggle-agree]');
+    if(cb) cb.classList.toggle('on');
+  });
+
+  // 兴趣标签切换
+  document.addEventListener('click', (e)=>{
+    const chip = e.target.closest('.interest-chip');
+    if(chip) chip.classList.toggle('on');
+  });
+
+  // 暴露给后面的扩展使用
+  window.__exchange = { go, back, showToast };
+})();
+</script>
+
+</body>
+</html>
