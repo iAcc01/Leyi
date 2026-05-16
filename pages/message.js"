@@ -1,0 +1,275 @@
+// pages/message.js —— 消息页
+import { CHATS, NOTIFICATIONS, ITEMS } from '../data.js';
+import { timeAgo, hhmm, esc, toast, openModal, closeModal } from '../utils.js';
+
+let activeTab = 'chat'; // chat | system
+
+export function renderMessage(container) {
+  container.innerHTML = `
+    <div class="page-in pb-4">
+      <!-- 顶部标题 -->
+      <div class="px-4 pt-4 flex items-center justify-between">
+        <h2 class="text-lg font-semibold">消息</h2>
+        <button id="mark-all" class="text-xs text-ink-500"><i class="ri-check-double-line mr-0.5"></i>全部已读</button>
+      </div>
+
+      <!-- 子 tab -->
+      <div class="px-4 mt-3 flex items-center gap-4 text-sm">
+        <button data-sub="chat" class="sub-tab ${activeTab==='chat'?'font-semibold text-mint-600':'text-ink-500'} relative pb-2">
+          交换沟通
+          ${activeTab==='chat'?'<span class="absolute left-1/2 -translate-x-1/2 bottom-0 w-6 h-0.5 rounded-full bg-mint-500"></span>':''}
+        </button>
+        <button data-sub="system" class="sub-tab ${activeTab==='system'?'font-semibold text-mint-600':'text-ink-500'} relative pb-2">
+          系统通知
+          ${activeTab==='system'?'<span class="absolute left-1/2 -translate-x-1/2 bottom-0 w-6 h-0.5 rounded-full bg-mint-500"></span>':''}
+        </button>
+      </div>
+
+      <div id="msg-body" class="mt-2"></div>
+    </div>
+  `;
+  container.querySelectorAll('.sub-tab').forEach(el => {
+    el.addEventListener('click', () => { activeTab = el.dataset.sub; renderMessage(container); });
+  });
+  container.querySelector('#mark-all').addEventListener('click', () => {
+    CHATS.forEach(c => c.unread = 0);
+    updateGlobalDot();
+    toast('已全部标记为已读');
+    renderMessage(container);
+  });
+
+  if (activeTab === 'chat') renderChatList(container);
+  else renderSystemList(container);
+}
+
+function renderChatList(container) {
+  const body = container.querySelector('#msg-body');
+  if (CHATS.length === 0) {
+    body.innerHTML = emptyHTML('暂无对话','在广场对感兴趣的物品点「想要」，即可开启对话');
+    return;
+  }
+  const sorted = [...CHATS].sort((a,b)=>b.lastTime - a.lastTime);
+  body.innerHTML = `
+    <div class="bg-white">
+      ${sorted.map(c => chatRowHTML(c)).join('')}
+    </div>
+  `;
+  body.querySelectorAll('[data-chat]').forEach(el => {
+    el.addEventListener('click', () => openChat(el.dataset.chat));
+  });
+}
+
+function chatRowHTML(c) {
+  const last = c.messages[c.messages.length - 1];
+  const preview = last ? (last.type==='image' ? '[图片]' : last.content) : '';
+  const isMine = last && last.from === 'me';
+  const doneTag = c.done ? '<span class="badge tag-done ml-1">已完成</span>' : '';
+  return `
+    <div class="list-item active:bg-cream-100 cursor-pointer" data-chat="${c.id}">
+      <div class="relative">
+        <img src="${c.peer.avatar}" class="w-12 h-12 rounded-full bg-cream-100" />
+        ${c.unread ? `<span class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">${c.unread}</span>`:''}
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center justify-between">
+          <div class="text-sm font-medium truncate">${esc(c.peer.name)}${doneTag}</div>
+          <div class="text-[11px] text-ink-400 ml-2">${timeAgo(c.lastTime)}</div>
+        </div>
+        <div class="text-xs text-ink-500 truncate mt-0.5">${isMine?'我：':''}${esc(preview)}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSystemList(container) {
+  const body = container.querySelector('#msg-body');
+  body.innerHTML = `
+    <div class="px-4 pt-2 space-y-2.5">
+      ${NOTIFICATIONS.map(n => `
+        <div class="bg-white rounded-2xl p-3 shadow-card flex gap-3">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${bgColor(n.color)}">
+            <i class="${n.icon} text-xl ${textColor(n.color)}"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+              <div class="text-sm font-medium">${esc(n.title)}</div>
+              <div class="text-[11px] text-ink-400">${timeAgo(n.time)}</div>
+            </div>
+            <div class="text-xs text-ink-500 mt-1 leading-relaxed">${esc(n.desc)}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function bgColor(c){
+  return { mint:'bg-mint-100', rose:'bg-rose-100', amber:'bg-amber-100' }[c] || 'bg-cream-100';
+}
+function textColor(c){
+  return { mint:'text-mint-600', rose:'text-rose-500', amber:'text-amber-600' }[c] || 'text-ink-500';
+}
+
+function emptyHTML(title, desc) {
+  return `
+    <div class="flex flex-col items-center py-16 text-center text-ink-500">
+      <div class="w-20 h-20 rounded-full bg-cream-100 flex items-center justify-center text-3xl mb-3">💬</div>
+      <p class="text-sm">${title}</p>
+      <p class="text-xs mt-1">${desc}</p>
+    </div>
+  `;
+}
+
+/** 打开具体会话 */
+function openChat(cid) {
+  const chat = CHATS.find(c => c.id === cid);
+  if (!chat) return;
+  chat.unread = 0;
+  updateGlobalDot();
+  const item = ITEMS.find(i => i.id === chat.itemId);
+
+  openModal(`
+    <div class="absolute inset-0 bg-cream-50 slide-up flex flex-col">
+      <!-- 顶部 -->
+      <header class="flex items-center gap-2 px-3 py-3 bg-white border-b border-ink-300/30">
+        <button data-close class="w-8 h-8 flex items-center justify-center"><i class="ri-arrow-left-line text-xl"></i></button>
+        <img src="${chat.peer.avatar}" class="w-8 h-8 rounded-full" />
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-medium truncate">${esc(chat.peer.name)}</div>
+          <div class="text-[11px] text-ink-500">${chat.done?'已完成交换':'在线'}</div>
+        </div>
+        <button class="w-8 h-8 flex items-center justify-center text-ink-500"><i class="ri-more-fill text-xl"></i></button>
+      </header>
+
+      ${item ? `
+        <div class="mx-3 mt-2 p-2 bg-white rounded-xl flex items-center gap-2 shadow-card">
+          <img src="${item.cover}" class="w-10 h-10 rounded-lg object-cover" />
+          <div class="flex-1 min-w-0">
+            <div class="text-xs font-medium truncate">关于：${esc(item.title)}</div>
+            <div class="text-[11px] text-mint-600 truncate">想换 ${esc(item.want)}</div>
+          </div>
+        </div>` : ''}
+
+      <!-- 安全提示 -->
+      <div class="mx-3 mt-2 text-[11px] text-ink-500 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 flex items-start gap-1">
+        <i class="ri-shield-check-line text-amber-600 mt-0.5"></i>
+        <span>交换请确认物品状态，建议同城当面交接～</span>
+      </div>
+
+      <!-- 消息列表 -->
+      <div id="msg-stream" class="flex-1 overflow-y-auto px-3 py-3 space-y-2">
+        ${chat.messages.map(m => bubbleHTML(m, chat.peer)).join('')}
+      </div>
+
+      <!-- 输入区 -->
+      ${chat.done ? `
+        <div class="p-3 bg-white border-t border-ink-300/30 text-center text-xs text-ink-500">
+          ✅ 此次交换已完成，输入已关闭
+        </div>
+      ` : `
+        <div class="bg-white border-t border-ink-300/30">
+          <div class="px-3 py-2 flex items-center gap-2">
+            <button id="done-btn" class="text-[11px] px-2.5 py-1 rounded-full bg-mint-100 text-mint-700">
+              <i class="ri-check-double-line mr-0.5"></i>交换成功
+            </button>
+            <button id="emoji-btn" class="text-[11px] px-2.5 py-1 rounded-full bg-cream-100 text-ink-500">
+              <i class="ri-emotion-line mr-0.5"></i>表情
+            </button>
+            <button id="img-btn" class="text-[11px] px-2.5 py-1 rounded-full bg-cream-100 text-ink-500">
+              <i class="ri-image-line mr-0.5"></i>图片
+            </button>
+          </div>
+          <div class="flex items-end gap-2 px-3 pb-3">
+            <textarea id="msg-input" rows="1" class="field !py-2 flex-1 resize-none" placeholder="输入消息…"></textarea>
+            <button id="send-btn" class="btn-primary !py-2 !px-4 shrink-0">发送</button>
+          </div>
+        </div>
+      `}
+    </div>
+  `);
+
+  const stream = document.getElementById('msg-stream');
+  stream.scrollTop = stream.scrollHeight;
+
+  if (!chat.done) {
+    const input = document.getElementById('msg-input');
+    const send = () => {
+      const v = (input.value || '').trim();
+      if (!v) return;
+      chat.messages.push({ from:'me', type:'text', content:v, time: Date.now() });
+      chat.lastTime = Date.now();
+      input.value = '';
+      stream.insertAdjacentHTML('beforeend', bubbleHTML(chat.messages.at(-1), chat.peer));
+      stream.scrollTop = stream.scrollHeight;
+
+      // 模拟自动回复
+      setTimeout(() => {
+        const reply = { from:'other', type:'text', content:'收到～稍后回复你', time: Date.now() };
+        chat.messages.push(reply);
+        chat.lastTime = Date.now();
+        stream.insertAdjacentHTML('beforeend', bubbleHTML(reply, chat.peer));
+        stream.scrollTop = stream.scrollHeight;
+      }, 900);
+    };
+    document.getElementById('send-btn').addEventListener('click', send);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+
+    document.getElementById('emoji-btn').addEventListener('click', () => { input.value += '😊'; input.focus(); });
+    document.getElementById('img-btn').addEventListener('click', () => toast('已调起相册（模拟）'));
+    document.getElementById('done-btn').addEventListener('click', () => {
+      chat.done = true;
+      toast('已标记为交换成功🎉');
+      closeModal();
+      renderMessage(document.getElementById('app'));
+    });
+  }
+}
+
+function bubbleHTML(m, peer) {
+  const side = m.from === 'me' ? 'justify-end' : 'justify-start';
+  const avatar = m.from === 'me'
+    ? `<img src="https://api.dicebear.com/7.x/fun-emoji/svg?seed=amy&backgroundColor=b8e7d2" class="w-7 h-7 rounded-full ml-1.5" />`
+    : `<img src="${peer.avatar}" class="w-7 h-7 rounded-full mr-1.5" />`;
+  const bubble = m.type === 'image'
+    ? `<img src="${m.content}" class="max-w-[60%] rounded-lg" />`
+    : `<div class="bubble ${m.from==='me'?'me':'other'}">${esc(m.content)}</div>`;
+  const time = `<div class="text-[10px] text-ink-400 mx-1 self-end">${hhmm(m.time)}</div>`;
+  return `
+    <div class="flex ${side} items-end">
+      ${m.from==='me'?'':avatar}
+      ${m.from==='me'?time:''}
+      ${bubble}
+      ${m.from==='me'?avatar:time}
+    </div>
+  `;
+}
+
+/** 创建/打开与物品主人的会话（由广场"想要"调用） */
+export function ensureChatWith(item) {
+  let chat = CHATS.find(c => c.peer.id === item.owner.id && c.itemId === item.id);
+  if (!chat) {
+    chat = {
+      id: 'c_' + Date.now(),
+      peer: item.owner,
+      itemId: item.id,
+      unread: 0,
+      lastTime: Date.now(),
+      done: false,
+      messages: [
+        { from:'me', type:'text', content:`你好～我对你的「${item.title}」很感兴趣，可以聊聊吗？`, time: Date.now() },
+      ],
+    };
+    CHATS.unshift(chat);
+  }
+  updateGlobalDot();
+}
+
+/** 更新底部 tab 红点 */
+export function updateGlobalDot() {
+  const total = CHATS.reduce((s,c)=>s+c.unread,0);
+  const dot = document.getElementById('msg-dot');
+  if (!dot) return;
+  if (total <= 0) { dot.style.display = 'none'; return; }
+  dot.style.display = 'flex';
+  dot.textContent = total > 99 ? '99+' : total;
+}

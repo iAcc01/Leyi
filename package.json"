@@ -1,0 +1,25 @@
+{
+  "name": "huanhuan-exchange",
+  "version": "1.0.0",
+  "description": "换换 · 闲置物品交换平台 - 轻量化社区驱动的物品交换应用",
+  "type": "module",
+  "scripts": {
+    "dev": "npx http-server . -p 8080 -c-1",
+    "lint": "eslint pages data.js utils.js main.js --ext .js",
+    "lint:fix": "eslint pages data.js utils.js main.js --ext .js --fix",
+    "format": "prettier --write \"**/*.js\" \"**/*.css\" \"**/*.html\"",
+    "preview": "npx http-server . -p 8080 -c-1"
+  },
+  "keywords": [
+    "exchange",
+    "secondhand",
+    "swap",
+    "community"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5"
+  }
+}

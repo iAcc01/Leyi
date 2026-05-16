@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>换换 · 闲置物品交换</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            mint: {
+              50: '#F0FAF6',
+              100: '#DFF5EB',
+              200: '#B8E7D2',
+              300: '#8AD5B4',
+              400: '#5BC296',
+              500: '#3BAE81',
+              600: '#2E936A',
+              700: '#247453',
+            },
+            cream: {
+              50: '#FBF8F3',
+              100: '#F6F1E7',
+              200: '#EDE5D2',
+            },
+            ink: {
+              900: '#1F2A28',
+              700: '#3A4B47',
+              500: '#6B7B77',
+              400: '#98A5A1',
+              300: '#C4CCC8',
+            }
+          },
+          fontFamily: {
+            sans: ['"PingFang SC"','"Microsoft YaHei"','system-ui','sans-serif']
+          },
+          boxShadow: {
+            'soft': '0 4px 16px rgba(46, 147, 106, 0.08)',
+            'card': '0 2px 10px rgba(31, 42, 40, 0.06)',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-ink-300/30 font-sans text-ink-900">
+
+  <!-- 外层：居中的手机模拟容器 -->
+  <div class="min-h-screen flex flex-col items-center py-6 px-4">
+
+    <!-- 顶部品牌栏（仅在桌面预览时展示） -->
+    <div class="hidden sm:flex items-center gap-3 mb-5">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-mint-400 to-mint-600 flex items-center justify-center shadow-soft">
+        <i class="ri-loop-left-line text-white text-xl"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-semibold tracking-wide">换换 · Exchange</h1>
+        <p class="text-xs text-ink-500">简单发布 · 快速匹配 · 信任优先</p>
+      </div>
+    </div>
+
+    <!-- 手机外壳 -->
+    <div class="phone-frame relative w-[390px] max-w-full h-[780px] bg-white rounded-[38px] shadow-2xl overflow-hidden border-[10px] border-ink-900">
+
+      <!-- 状态栏 -->
+      <div class="absolute top-0 left-0 right-0 h-9 flex items-center justify-between px-6 text-[12px] font-medium z-30 bg-white/95 backdrop-blur">
+        <span>9:41</span>
+        <div class="absolute left-1/2 -translate-x-1/2 top-1.5 w-24 h-5 bg-ink-900 rounded-full"></div>
+        <div class="flex items-center gap-1">
+          <i class="ri-signal-tower-line"></i>
+          <i class="ri-wifi-line"></i>
+          <i class="ri-battery-line"></i>
+        </div>
+      </div>
+
+      <!-- 主视图区域（页面切换）-->
+      <main id="app" class="absolute top-9 left-0 right-0 bottom-[60px] overflow-y-auto bg-cream-50">
+        <!-- 页面内容会被 JS 动态渲染 -->
+      </main>
+
+      <!-- 底部 Tab -->
+      <nav id="tabbar" class="absolute left-0 right-0 bottom-0 h-[60px] bg-white border-t border-ink-300/60 flex items-center justify-around z-20">
+        <button data-tab="square" class="tab-btn flex flex-col items-center gap-0.5 flex-1 py-1.5 active">
+          <i class="ri-store-2-line text-[22px]"></i>
+          <span class="text-[11px]">广场</span>
+        </button>
+        <button data-tab="publish" class="tab-btn flex flex-col items-center gap-0.5 flex-1 py-1.5 relative">
+          <span class="absolute -top-4 w-12 h-12 rounded-full bg-gradient-to-br from-mint-400 to-mint-600 shadow-soft flex items-center justify-center text-white">
+            <i class="ri-add-line text-2xl"></i>
+          </span>
+          <span class="text-[11px] mt-7">发布</span>
+        </button>
+        <button data-tab="message" class="tab-btn flex flex-col items-center gap-0.5 flex-1 py-1.5 relative">
+          <i class="ri-chat-3-line text-[22px]"></i>
+          <span id="msg-dot" class="absolute top-1 right-10 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">3</span>
+          <span class="text-[11px]">消息</span>
+        </button>
+        <button data-tab="me" class="tab-btn flex flex-col items-center gap-0.5 flex-1 py-1.5">
+          <i class="ri-user-3-line text-[22px]"></i>
+          <span class="text-[11px]">我的</span>
+        </button>
+      </nav>
+
+      <!-- 全局 Toast -->
+      <div id="toast" class="absolute bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-ink-900/85 text-white text-xs opacity-0 pointer-events-none transition-opacity duration-300 z-40"></div>
+
+      <!-- 全局弹层容器（详情、成功页、聊天页） -->
+      <div id="modal-root" class="absolute inset-0 z-40 pointer-events-none"></div>
+    </div>
+
+    <!-- 说明文案 -->
+    <div class="mt-6 text-center text-xs text-ink-500 max-w-[420px] leading-relaxed">
+      ✨ 这是「换换」的轻量原型 —— 点击底部 Tab 切换，试试发布一个闲置、在广场点击「想要」、进入消息沟通完成交换吧～
+    </div>
+
+    <!-- 签名 -->
+    <footer class="text-center text-xs text-ink-500 mt-4">
+      <p>由 <a href="https://with.woa.com/" style="color: #8A2BE2;" target="_blank">With</a> 通过自然语言生成</p>
+    </footer>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

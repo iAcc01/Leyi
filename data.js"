@@ -1,0 +1,234 @@
+// data.js —— 模拟数据源（mock）
+// 图片来自搜索结果，确保内容与图一致
+
+export const CATEGORIES = [
+  { key: 'all',     label: '全部' },
+  { key: 'book',    label: '📖 书籍' },
+  { key: 'digital', label: '📱 数码' },
+  { key: 'baby',    label: '🍼 母婴' },
+  { key: 'cloth',   label: '👗 服饰' },
+  { key: 'craft',   label: '🎨 手作' },
+  { key: 'plant',   label: '🌱 植物' },
+];
+
+export const SORTS = [
+  { key: 'recommend', label: '综合推荐' },
+  { key: 'latest',    label: '最新发布' },
+  { key: 'near',      label: '距离最近' },
+];
+
+// 当前用户（模拟）
+export const ME = {
+  id: 'u_me',
+  name: '阿米',
+  avatar: 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=amy&backgroundColor=b8e7d2',
+  bio: '爱交换绘本的宝妈 · 坐标上海',
+  city: '上海',
+};
+
+// 物品列表
+export const ITEMS = [
+  {
+    id: 'it_01',
+    title: '九成新《小王子》绘本',
+    cover: 'https://picsum.photos/seed/exchange1/400/400',
+    cate: 'book',
+    city: '上海 · 浦东',
+    distance: 1.2,
+    owner: { id:'u_01', name:'柠檬妈', avatar:'https://api.dicebear.com/7.x/fun-emoji/svg?seed=lemon&backgroundColor=ffd6a5' },
+    want: '儿童积木 / 乐高',
+    desc: '孩子长大不看了，品相完好，内页无涂画。',
+    cond: '九成新',
+    time: Date.now() - 1000 * 60 * 60 * 3,
+  },
+  {
+    id: 'it_02',
+    title: '乐高经典创意小颗粒积木',
+    cover: 'https://picsum.photos/seed/exchange2/400/400',
+    cate: 'baby',
+    city: '上海 · 徐汇',
+    distance: 3.8,
+    owner: { id:'u_02', name:'饼干爸', avatar:'https://api.dicebear.com/7.x/fun-emoji/svg?seed=bingan&backgroundColor=caffbf' },
+    want: '儿童绘本 / 图画书',
+    desc: '全套齐全，消毒擦洗过，适合 4-6 岁。',
+    cond: '九成新',
+    time: Date.now() - 1000 * 60 * 60 * 6,
+  },
+  {
+    id: 'it_03',
+    title: 'AirPods Max 白色（一代）',
+    cover: 'https://picsum.photos/seed/exchange3/400/400',
+    cate: 'digital',
+    city: '上海 · 静安',
+    distance: 5.4,
+    owner: { id:'u_03', name:'Mono', avatar:'https://api.dicebear.com/7.x/fun-emoji/svg?seed=mono&backgroundColor=a0c4ff' },
+    want: 'Kindle / 电子书阅读器',
+    desc: '自用一年，外壳微磨痕，功能完好。',
+    cond: '九成新',
+    time: Date.now() - 1000 * 60 * 60 * 12,
+  },
+  {
+    id: 'it_04',
+    title: '母婴推车（轻便可折叠）',
+    cover: 'https://picsum.photos/seed/exchange4/400/400',
+    cate: 'baby',
+    city: '上海 · 长宁',
+    distance: 4.1,
+    owner: { id:'u_04', name:'小叶子', avatar:'https://api.dicebear.com/7.x/fun-emoji/svg?seed=leaf&backgroundColor=fdffb6' },
+    want: '儿童早教桌 / 学习玩具',
+    desc: '孩子大了用不上，零件齐全。',
+    cond: '微瑕',
+    time: Date.now() - 1000 * 60 * 60 * 20,
+  },
+  {
+    id: 'it_05',
+    title: '手工编织拼色毛衣开衫',
+    cover: 'https://picsum.photos/seed/exchange5/400/400',
+    cate: 'cloth',
+    city: '上海 · 浦东',
+    distance: 2.3,
+    owner: { id:'u_05', name:'半夏', avatar:'https://api.dicebear.com/7.x/fun-emoji/svg?seed=banxia&backgroundColor=ffc6ff' },
+    want: '羊毛线 / 手工材料',
+    desc: '自己织的，只穿过一次，干净整洁。',
+    cond: '九成新',
+    time: Date.now() - 1000 * 60 * 60 * 30,
+  },
+  {
+    id: 'it_06',
+    title: '独立设计手作陶瓷杯',
+    cover: 'https://picsum.photos/seed/exchange6/400/400',
+    cate: 'craft',
+    city: '上海 · 黄浦',
+    distance: 6.0,
+    owner: { id:'u_06', name:'陶陶', avatar:'https://api.dicebear.com/7.x/fun-emoji/svg?seed=tao&backgroundColor=bdb2ff' },
+    want: '植物盆栽 / 插花器皿',
+    desc: '海青釉，独一份，手感温润。',
+    cond: '全新',
+    time: Date.now() - 1000 * 60 * 60 * 48,
+  },
+  {
+    id: 'it_07',
+    title: 'Kindle 电子书阅读器',
+    cover: 'https://picsum.photos/seed/exchange7/400/400',
+    cate: 'digital',
+    city: '上海 · 杨浦',
+    distance: 7.8,
+    owner: { id:'u_07', name:'读者C', avatar:'https://api.dicebear.com/7.x/fun-emoji/svg?seed=reader&backgroundColor=9bf6ff' },
+    want: '纸质小说 / 文学书籍',
+    desc: '功能完好，附原装数据线。',
+    cond: '九成新',
+    time: Date.now() - 1000 * 60 * 60 * 60,
+  },
+  {
+    id: 'it_08',
+    title: '治愈小盆栽（肉肉）',
+    cover: 'https://picsum.photos/seed/exchange8/400/400',
+    cate: 'plant',
+    city: '上海 · 静安',
+    distance: 5.1,
+    owner: { id:'u_08', name:'绿手指', avatar:'https://api.dicebear.com/7.x/fun-emoji/svg?seed=green&backgroundColor=8AD5B4' },
+    want: '多肉植物 / 小花盆',
+    desc: '养了半年，状态良好，适合桌面摆放。',
+    cond: '全新',
+    time: Date.now() - 1000 * 60 * 60 * 72,
+  },
+  {
+    id: 'it_09',
+    title: '复古胶片相机（可正常使用）',
+    cover: 'https://picsum.photos/seed/exchange9/400/400',
+    cate: 'digital',
+    city: '上海 · 虹口',
+    distance: 8.5,
+    owner: { id:'u_09', name:'胶片青年', avatar:'https://api.dicebear.com/7.x/fun-emoji/svg?seed=film&backgroundColor=ffadad' },
+    want: '二手数码相机 / 镜头',
+    desc: '收藏了好几台，出一只换个数码备机。',
+    cond: '微瑕',
+    time: Date.now() - 1000 * 60 * 60 * 100,
+  },
+];
+
+// 我发布的
+export const MY_ITEMS = [
+  {
+    id: 'my_01',
+    title: '全套《DK儿童百科》',
+    cover: 'https://picsum.photos/seed/my1/400/400',
+    status: 'live',
+    want: '益智拼图 / 桌游',
+    time: Date.now() - 1000 * 60 * 60 * 8,
+  },
+  {
+    id: 'my_02',
+    title: '闲置蓝牙音箱',
+    cover: 'https://picsum.photos/seed/my2/400/400',
+    status: 'pending',
+    want: 'Kindle 阅读器',
+    time: Date.now() - 1000 * 60 * 30,
+  },
+  {
+    id: 'my_03',
+    title: '手绘明信片一组',
+    cover: 'https://picsum.photos/seed/my3/400/400',
+    status: 'done',
+    want: '独立杂志',
+    time: Date.now() - 1000 * 60 * 60 * 24 * 5,
+  },
+];
+
+// 我想要的
+export const MY_WANTS = [ 'it_02', 'it_06', 'it_08' ];
+
+// 交换记录
+export const HISTORY = [
+  { id:'h01', title:'儿童拼图 ↔ 手绘明信片', time: Date.now() - 1000*60*60*24*5 },
+  { id:'h02', title:'旧毛线 ↔ 手工织物', time: Date.now() - 1000*60*60*24*30 },
+];
+
+// 会话
+export const CHATS = [
+  {
+    id: 'c01',
+    peer: { id:'u_02', name:'饼干爸', avatar:'https://api.dicebear.com/7.x/fun-emoji/svg?seed=bingan&backgroundColor=caffbf' },
+    itemId: 'it_02',
+    unread: 2,
+    lastTime: Date.now() - 1000 * 60 * 8,
+    done: false,
+    messages: [
+      { from:'other', type:'text', content:'你好，我对你的《DK儿童百科》感兴趣～', time: Date.now()-1000*60*30 },
+      { from:'me',    type:'text', content:'你好！我这边想换点儿童积木，你乐高成色怎么样？', time: Date.now()-1000*60*25 },
+      { from:'other', type:'text', content:'九成新，零件齐全。周末浦东地铁站附近见面？', time: Date.now()-1000*60*10 },
+      { from:'other', type:'text', content:'方便给我看看你书的内页嘛？', time: Date.now()-1000*60*8 },
+    ],
+  },
+  {
+    id: 'c02',
+    peer: { id:'u_06', name:'陶陶', avatar:'https://api.dicebear.com/7.x/fun-emoji/svg?seed=tao&backgroundColor=bdb2ff' },
+    itemId: 'it_06',
+    unread: 1,
+    lastTime: Date.now() - 1000 * 60 * 60 * 2,
+    done: false,
+    messages: [
+      { from:'me',    type:'text', content:'您好～我用一棵多肉和您换这只陶瓷杯，可以吗？', time: Date.now()-1000*60*60*3 },
+      { from:'other', type:'text', content:'好呀，可以发张图片看看嘛？', time: Date.now()-1000*60*60*2 },
+    ],
+  },
+  {
+    id: 'c03',
+    peer: { id:'u_05', name:'半夏', avatar:'https://api.dicebear.com/7.x/fun-emoji/svg?seed=banxia&backgroundColor=ffc6ff' },
+    itemId: 'it_05',
+    unread: 0,
+    lastTime: Date.now() - 1000 * 60 * 60 * 26,
+    done: true,
+    messages: [
+      { from:'me',    type:'text', content:'已经面基啦，感谢～毛衣很好看！', time: Date.now()-1000*60*60*30 },
+      { from:'other', type:'text', content:'你的毛线也超棒，下次再换～', time: Date.now()-1000*60*60*26 },
+    ],
+  },
+];
+
+// 系统通知
+export const NOTIFICATIONS = [
+  { id:'n1', icon:'ri-notification-3-line', color:'mint', title:'发布成功', desc:'你的「全套《DK儿童百科》」已发布到广场', time: Date.now()-1000*60*60*8 },
+  { id:'n2', icon:'ri-heart-3-line',     color:'rose', title:'有人想要你的物品', desc:'饼干爸 对你的《DK儿童百科》感兴趣，去聊聊？', time: Date.now()-1000*60*60*2 },
+  { id:'n3', icon:'ri-shield-check-line',  color:'amber', title:'安全提示', desc:'交换请确认物品状态，建议同城当面交接～', time: Date.now()-1000*60*60*48 },
+];

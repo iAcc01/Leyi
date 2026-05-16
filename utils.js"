@@ -1,0 +1,70 @@
+// utils.js —— 通用工具方法
+export function $(sel, root = document) { return root.querySelector(sel); }
+export function $$(sel, root = document) { return [...root.querySelectorAll(sel)]; }
+
+/** 相对时间（e.g. 2小时前） */
+export function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return '刚刚';
+  if (m < 60) return `${m} 分钟前`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h} 小时前`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `${d} 天前`;
+  return new Date(ts).toLocaleDateString();
+}
+
+/** HH:MM */
+export function hhmm(ts) {
+  const d = new Date(ts);
+  const pad = n => n.toString().padStart(2, '0');
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** 全局 toast */
+export function toast(msg, duration = 1800) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.opacity = '1';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { el.style.opacity = '0'; }, duration);
+}
+
+/** 简易敏感词过滤（演示用） */
+const BAD_WORDS = ['钱', '转账', '微信支付', '支付宝', '红包', 'http://', 'https://'];
+export function hasSensitive(text = '') {
+  return BAD_WORDS.find(w => text.includes(w));
+}
+
+/** 转义HTML */
+export function esc(str = '') {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/** 渲染模态（从底部上滑） */
+export function openModal(html, opts = {}) {
+  const root = document.getElementById('modal-root');
+  root.classList.remove('pointer-events-none');
+  root.innerHTML = `
+    <div class="mask" data-close></div>
+    <div class="absolute left-0 right-0 bottom-0 top-0 flex flex-col ${opts.panelCls || ''}">
+      ${html}
+    </div>
+  `;
+  root.querySelectorAll('[data-close]').forEach(el => {
+    el.addEventListener('click', closeModal);
+  });
+}
+
+export function closeModal() {
+  const root = document.getElementById('modal-root');
+  root.classList.add('pointer-events-none');
+  root.innerHTML = '';
+}

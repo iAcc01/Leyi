@@ -1,0 +1,41 @@
+// main.js —— 全局应用入口与 Tab 路由
+import { renderSquare } from './pages/square.js';
+import { renderPublish } from './pages/publish.js';
+import { renderMessage, ensureChatWith as _ensure, updateGlobalDot } from './pages/message.js';
+import { renderMe } from './pages/me.js';
+
+const app = document.getElementById('app');
+const tabbar = document.getElementById('tabbar');
+
+const pages = {
+  square: renderSquare,
+  publish: renderPublish,
+  message: renderMessage,
+  me: renderMe,
+};
+
+let currentTab = 'square';
+
+export function switchTo(tab) {
+  if (!pages[tab]) return;
+  currentTab = tab;
+  // 刷新 Tab 激活态
+  tabbar.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  // 滚动置顶
+  app.scrollTop = 0;
+  pages[tab](app);
+}
+
+// 底部 Tab 点击
+tabbar.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTo(btn.dataset.tab));
+});
+
+// 桥接：广场页用它来创建会话
+export function ensureChatWith(item) { _ensure(item); }
+
+// 初始化
+switchTo('square');
+updateGlobalDot();

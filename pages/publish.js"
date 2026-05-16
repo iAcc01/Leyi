@@ -1,0 +1,284 @@
+// pages/publish.js —— 发布页
+import { CATEGORIES, MY_ITEMS } from '../data.js';
+import { esc, toast, hasSensitive, openModal, closeModal } from '../utils.js';
+import { switchTo } from '../main.js';
+
+// 预置演示图片（用于模拟"拍照上传"）
+const DEMO_IMAGES = [
+  'https://picsum.photos/seed/pub1/400/400',
+  'https://picsum.photos/seed/pub2/400/400',
+  'https://picsum.photos/seed/pub3/400/400',
+];
+
+const form = {
+  images: [],
+  title: '',
+  cate: '',
+  city: '上海',
+  want: '',
+  desc: '',
+  cond: '九成新',
+};
+
+export function renderPublish(container) {
+  container.innerHTML = `
+    <div class="page-in pb-6">
+      <div class="px-4 pt-4">
+        <h2 class="text-lg font-semibold">发布闲置</h2>
+        <p class="text-xs text-ink-500 mt-1">3 分钟完成，让宝贝流动起来 ✨</p>
+      </div>
+
+      <div class="mx-4 mt-4 p-4 bg-white rounded-2xl shadow-card space-y-4">
+
+        <!-- 图片上传 -->
+        <div>
+          <label class="text-xs text-ink-500 flex items-center justify-between">
+            <span>物品照片 <span class="text-red-500">*</span></span>
+            <span class="text-[11px] text-ink-400" id="img-count">${form.images.length}/3</span>
+          </label>
+          <div class="mt-2 flex items-center gap-2" id="img-slots"></div>
+          <p class="text-[11px] text-ink-400 mt-1.5">单张 ≤ 2MB，将自动压缩加速</p>
+        </div>
+
+        <!-- 标题 -->
+        <div>
+          <label class="text-xs text-ink-500">标题 <span class="text-red-500">*</span></label>
+          <input id="f-title" maxlength="20" class="field mt-1.5" placeholder="一句话介绍你的宝贝" value="${esc(form.title)}" />
+          <div class="text-right text-[11px] text-ink-400 mt-0.5" id="title-count">${form.title.length}/20</div>
+        </div>
+
+        <!-- 分类 -->
+        <div>
+          <label class="text-xs text-ink-500">分类 <span class="text-red-500">*</span></label>
+          <div class="mt-2 flex flex-wrap gap-2" id="f-cate">
+            ${CATEGORIES.filter(c=>c.key!=='all').map(c => `
+              <div class="chip ${form.cate===c.key?'active':''}" data-cate="${c.key}">${c.label}</div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- 城市 -->
+        <div>
+          <label class="text-xs text-ink-500">所在城市 <span class="text-red-500">*</span></label>
+          <div class="mt-1.5 flex items-center gap-2">
+            <input id="f-city" class="field flex-1" value="${esc(form.city)}" />
+            <button id="f-auto" class="btn-ghost !py-2 !px-3 text-xs whitespace-nowrap">
+              <i class="ri-map-pin-line mr-1"></i>自动定位
+            </button>
+          </div>
+        </div>
+
+        <!-- 求换 -->
+        <div>
+          <label class="text-xs text-ink-500">求换什么 <span class="text-red-500">*</span></label>
+          <input id="f-want" maxlength="50" class="field mt-1.5" placeholder="如：儿童绘本 / 乐高积木" value="${esc(form.want)}" />
+        </div>
+
+        <!-- 描述 -->
+        <div>
+          <label class="text-xs text-ink-500">物品描述（选填）</label>
+          <textarea id="f-desc" maxlength="100" rows="3" class="field mt-1.5 resize-none" placeholder="可补充成色、购入时间、使用情况…">${esc(form.desc)}</textarea>
+          <div class="text-right text-[11px] text-ink-400 mt-0.5" id="desc-count">${form.desc.length}/100</div>
+        </div>
+
+        <!-- 成色 -->
+        <div>
+          <label class="text-xs text-ink-500">成色（选填）</label>
+          <div class="mt-2 flex gap-2" id="f-cond">
+            ${['全新','九成新','微瑕'].map(v => `
+              <div class="chip ${form.cond===v?'active':''}" data-cond="${v}">${v}</div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- 安全提示 -->
+      <div class="mx-4 mt-3 text-[11px] text-ink-500 flex items-start gap-1.5 leading-relaxed">
+        <i class="ri-shield-check-line mt-0.5 text-mint-500"></i>
+        <span>请勿发布涉及转账、金钱等交易内容；不允许分享外部链接。</span>
+      </div>
+
+      <!-- 发布按钮 -->
+      <div class="mx-4 mt-4">
+        <button id="submit-btn" class="btn-primary w-full"><i class="ri-send-plane-fill mr-1"></i>发布到广场</button>
+      </div>
+    </div>
+  `;
+  renderImgSlots(container);
+  bindEvents(container);
+}
+
+function renderImgSlots(container) {
+  const slots = container.querySelector('#img-slots');
+  const html = [];
+  form.images.forEach((src, i) => {
+    html.push(`
+      <div class="upload-slot">
+        <img src="${src}" />
+        <span class="remove" data-del="${i}"><i class="ri-close-line"></i></span>
+      </div>
+    `);
+  });
+  if (form.images.length < 3) {
+    html.push(`
+      <div class="upload-slot" id="add-img">
+        <div class="flex flex-col items-center text-[11px]">
+          <i class="ri-camera-line text-lg"></i>
+          <span class="mt-0.5">上传</span>
+        </div>
+      </div>
+    `);
+  }
+  slots.innerHTML = html.join('');
+  container.querySelector('#img-count').textContent = `${form.images.length}/3`;
+
+  const add = slots.querySelector('#add-img');
+  if (add) add.addEventListener('click', openImagePicker);
+  slots.querySelectorAll('[data-del]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      form.images.splice(+el.dataset.del, 1);
+      renderImgSlots(container);
+    });
+  });
+}
+
+function openImagePicker() {
+  openModal(`
+    <div class="absolute left-0 right-0 bottom-0 bg-white rounded-t-2xl slide-up p-4">
+      <div class="w-10 h-1 rounded-full bg-ink-300 mx-auto mb-3"></div>
+      <h3 class="text-sm font-semibold mb-2">选择图片来源</h3>
+      <p class="text-[11px] text-ink-400 mb-3">从下列模拟素材中选择（真实小程序将调起相册/相机）</p>
+      <div class="grid grid-cols-3 gap-2">
+        ${DEMO_IMAGES.map((src,i)=>`
+          <img src="${src}" data-pick="${i}" class="w-full aspect-square object-cover rounded-lg border-2 border-transparent active:border-mint-400 cursor-pointer" />
+        `).join('')}
+      </div>
+      <button data-close class="btn-ghost w-full mt-3">取消</button>
+    </div>
+  `);
+  document.querySelectorAll('[data-pick]').forEach(el => {
+    el.addEventListener('click', () => {
+      form.images.push(DEMO_IMAGES[+el.dataset.pick]);
+      if (form.images.length > 3) form.images = form.images.slice(0,3);
+      closeModal();
+      renderImgSlots(document.getElementById('app'));
+    });
+  });
+}
+
+function bindEvents(container) {
+  const title = container.querySelector('#f-title');
+  title.addEventListener('input', () => {
+    form.title = title.value;
+    container.querySelector('#title-count').textContent = `${title.value.length}/20`;
+  });
+  container.querySelectorAll('#f-cate .chip').forEach(el => {
+    el.addEventListener('click', () => {
+      form.cate = el.dataset.cate;
+      container.querySelectorAll('#f-cate .chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+    });
+  });
+  container.querySelector('#f-city').addEventListener('input', e => { form.city = e.target.value; });
+  container.querySelector('#f-auto').addEventListener('click', () => {
+    container.querySelector('#f-city').value = '上海';
+    form.city = '上海';
+    toast('已为你定位到：上海');
+  });
+  container.querySelector('#f-want').addEventListener('input', e => { form.want = e.target.value; });
+  const desc = container.querySelector('#f-desc');
+  desc.addEventListener('input', () => {
+    form.desc = desc.value;
+    container.querySelector('#desc-count').textContent = `${desc.value.length}/100`;
+  });
+  container.querySelectorAll('#f-cond .chip').forEach(el => {
+    el.addEventListener('click', () => {
+      form.cond = el.dataset.cond;
+      container.querySelectorAll('#f-cond .chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+    });
+  });
+
+  container.querySelector('#submit-btn').addEventListener('click', submit);
+}
+
+function submit() {
+  if (form.images.length === 0 || !form.title.trim()) {
+    toast('请补充物品照片和名称～');
+    return;
+  }
+  if (!form.cate) { toast('请选择一个分类'); return; }
+  if (!form.want.trim()) { toast('请填写你想求换什么'); return; }
+
+  const bad = hasSensitive(form.title + form.desc + form.want);
+  if (bad) { toast(`含敏感内容「${bad}」，请修改后再发布`); return; }
+
+  // 写入我的发布
+  MY_ITEMS.unshift({
+    id: 'my_' + Date.now(),
+    title: form.title,
+    cover: form.images[0],
+    status: 'live',
+    want: form.want,
+    time: Date.now(),
+  });
+
+  showSuccessPage();
+}
+
+function showSuccessPage() {
+  openModal(`
+    <div class="absolute inset-0 bg-gradient-to-b from-mint-50 to-white slide-up flex flex-col">
+      <div class="flex-1 flex flex-col items-center justify-center px-8 text-center">
+        <div class="w-24 h-24 rounded-full bg-mint-100 flex items-center justify-center mb-4 relative">
+          <div class="absolute inset-0 rounded-full bg-mint-200/60 animate-ping"></div>
+          <i class="ri-check-line text-5xl text-mint-600 relative"></i>
+        </div>
+        <h3 class="text-lg font-semibold">已发布到广场！</h3>
+        <p class="text-sm text-ink-500 mt-2 leading-relaxed">
+          去看看谁对你的物品感兴趣？<br/>
+          也可以分享给朋友圈，让更多人看到～
+        </p>
+
+        <div class="mt-6 w-full p-3 rounded-xl bg-white shadow-card flex items-center gap-3 text-left">
+          <img src="${form.images[0]}" class="w-14 h-14 rounded-lg object-cover" />
+          <div class="flex-1 min-w-0">
+            <div class="text-sm font-medium truncate">${esc(form.title)}</div>
+            <div class="text-[11px] text-mint-600 mt-0.5 truncate"><i class="ri-loop-left-line mr-0.5"></i>想换 ${esc(form.want)}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 space-y-2">
+        <button id="ok-share" class="btn-primary w-full">
+          <i class="ri-share-forward-line mr-1"></i>分享到微信群
+        </button>
+        <div class="flex gap-2">
+          <button id="ok-square" class="btn-ghost flex-1">看看广场</button>
+          <button id="ok-mine" class="btn-ghost flex-1">我的发布</button>
+        </div>
+      </div>
+    </div>
+  `);
+  document.querySelector('#ok-share').addEventListener('click', () => toast('已复制分享链接（模拟）'));
+  document.querySelector('#ok-square').addEventListener('click', () => {
+    resetForm();
+    closeModal();
+    switchTo('square');
+  });
+  document.querySelector('#ok-mine').addEventListener('click', () => {
+    resetForm();
+    closeModal();
+    switchTo('me');
+  });
+}
+
+function resetForm() {
+  form.images = [];
+  form.title = '';
+  form.cate = '';
+  form.want = '';
+  form.desc = '';
+  form.cond = '九成新';
+}

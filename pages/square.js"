@@ -1,0 +1,203 @@
+// pages/square.js —— 广场页
+import { ITEMS, CATEGORIES, SORTS } from '../data.js';
+import { timeAgo, esc, toast, openModal, closeModal } from '../utils.js';
+import { ensureChatWith, switchTo } from '../main.js';
+
+const state = {
+  sort: 'recommend',
+  cate: 'all',
+};
+
+export function renderSquare(container) {
+  container.innerHTML = `
+    <div class="page-in">
+      <!-- Banner -->
+      <div class="px-4 pt-4">
+        <div class="rounded-2xl bg-gradient-to-br from-mint-400 to-mint-600 text-white p-4 shadow-soft relative overflow-hidden">
+          <div class="absolute -right-4 -top-4 w-24 h-24 rounded-full bg-white/10"></div>
+          <div class="absolute right-8 bottom-0 w-16 h-16 rounded-full bg-white/10"></div>
+          <h2 class="text-lg font-semibold tracking-wide">让闲置 · 流动起来</h2>
+          <p class="text-xs text-white/85 mt-1">同城 · 兴趣 · 零压力 · 信任优先</p>
+          <div class="mt-3 flex items-center gap-2 text-[11px]">
+            <span class="bg-white/20 rounded-full px-2 py-0.5">🌱 今日新发布 12</span>
+            <span class="bg-white/20 rounded-full px-2 py-0.5">🤝 促成交换 3</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 排序 + 分类 -->
+      <div class="px-4 pt-3 sticky top-0 z-10 bg-cream-50/95 backdrop-blur pb-2">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-3 text-xs text-ink-700" id="sort-row">
+            ${SORTS.map(s => `
+              <button data-sort="${s.key}" class="sort-btn flex items-center gap-1 ${state.sort===s.key?'text-mint-600 font-medium':''}">
+                ${s.label}
+                ${state.sort===s.key?'<i class="ri-check-line"></i>':''}
+              </button>
+            `).join('<span class="text-ink-300">·</span>')}
+          </div>
+          <button id="locate-btn" class="text-xs text-ink-500 flex items-center gap-1">
+            <i class="ri-map-pin-line"></i>上海
+          </button>
+        </div>
+        <div class="chip-row" id="cate-row">
+          ${CATEGORIES.map(c => `
+            <div class="chip ${state.cate===c.key?'active':''}" data-cate="${c.key}">${c.label}</div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- 卡片流 -->
+      <div class="px-4 pt-3 pb-6" id="item-grid-wrap"></div>
+    </div>
+  `;
+
+  bindFilters(container);
+  renderGrid(container);
+}
+
+function bindFilters(container) {
+  container.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.sort = btn.dataset.sort;
+      renderSquare(container);
+    });
+  });
+  container.querySelectorAll('.chip').forEach(c => {
+    c.addEventListener('click', () => {
+      state.cate = c.dataset.cate;
+      renderSquare(container);
+    });
+  });
+  const locate = container.querySelector('#locate-btn');
+  if (locate) locate.addEventListener('click', () => toast('已基于微信定位为你筛选附近物品'));
+}
+
+function renderGrid(container) {
+  const wrap = container.querySelector('#item-grid-wrap');
+  let list = [...ITEMS];
+  if (state.cate !== 'all') list = list.filter(i => i.cate === state.cate);
+  if (state.sort === 'latest') list.sort((a,b) => b.time - a.time);
+  else if (state.sort === 'near') list.sort((a,b) => a.distance - b.distance);
+  else list.sort((a,b) => (b.time/1e9 - a.distance) - (a.time/1e9 - b.distance));
+
+  if (list.length === 0) {
+    wrap.innerHTML = `
+      <div class="flex flex-col items-center justify-center py-16 text-center text-ink-500">
+        <div class="w-20 h-20 rounded-full bg-mint-100 flex items-center justify-center text-4xl mb-3">🕊️</div>
+        <p class="text-sm">这里还空空的～</p>
+        <p class="text-xs mt-1">去发布你的闲置，成为第一个交换者吧</p>
+        <button id="go-publish" class="btn-primary mt-4 !py-2 !px-5 text-xs">去发布</button>
+      </div>
+    `;
+    wrap.querySelector('#go-publish').addEventListener('click', () => switchTo('publish'));
+    return;
+  }
+
+  wrap.innerHTML = `
+    <div class="grid grid-cols-2 gap-3">
+      ${list.map((it, idx) => itemCardHTML(it, idx)).join('')}
+    </div>
+  `;
+
+  wrap.querySelectorAll('[data-card]').forEach(el => {
+    el.addEventListener('click', () => openDetail(el.dataset.card));
+  });
+  wrap.querySelectorAll('[data-want]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      handleWant(el.dataset.want);
+    });
+  });
+}
+
+function itemCardHTML(it, idx) {
+  const condColor = it.cond === '全新' ? 'tag-live' : (it.cond === '九成新' ? 'tag-live' : 'tag-pending');
+  return `
+    <div class="item-card fade-up" style="animation-delay:${idx*30}ms" data-card="${it.id}">
+      <div class="relative">
+        <img class="cover" src="${it.cover}" alt="${esc(it.title)}" />
+        <span class="badge ${condColor} absolute left-2 top-2 backdrop-blur bg-white/85">${it.cond}</span>
+      </div>
+      <div class="p-2.5 flex flex-col gap-1.5">
+        <div class="text-[13px] font-medium leading-snug line-clamp-2 min-h-[34px]">${esc(it.title)}</div>
+        <div class="text-[11px] text-mint-600 bg-mint-50 rounded px-1.5 py-0.5 inline-flex items-center gap-1 w-fit max-w-full truncate">
+          <i class="ri-loop-left-line"></i><span class="truncate">想换 ${esc(it.want)}</span>
+        </div>
+        <div class="flex items-center justify-between mt-1">
+          <div class="flex items-center gap-1 text-[11px] text-ink-500 min-w-0">
+            <img src="${it.owner.avatar}" class="w-4 h-4 rounded-full bg-ink-100" />
+            <span class="truncate">${esc(it.owner.name)}</span>
+            <span class="text-ink-300">·</span>
+            <span class="shrink-0">${it.distance}km</span>
+          </div>
+          <button data-want="${it.id}" class="text-[11px] px-2 py-1 rounded-full bg-mint-500 text-white active:scale-95">
+            <i class="ri-hand-heart-line"></i>想要
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function handleWant(id) {
+  const it = ITEMS.find(i => i.id === id);
+  if (!it) return;
+  ensureChatWith(it);
+  toast(`已向 ${it.owner.name} 发起沟通～`);
+  setTimeout(() => switchTo('message'), 500);
+}
+
+function openDetail(id) {
+  const it = ITEMS.find(i => i.id === id);
+  if (!it) return;
+  openModal(`
+    <div class="absolute inset-0 bg-white slide-up overflow-y-auto">
+      <div class="relative">
+        <img src="${it.cover}" class="w-full aspect-square object-cover" />
+        <button data-close class="absolute top-3 left-3 w-9 h-9 rounded-full bg-white/80 backdrop-blur flex items-center justify-center">
+          <i class="ri-arrow-left-line text-xl"></i>
+        </button>
+        <span class="absolute top-3 right-3 badge tag-live bg-white/90">${it.cond}</span>
+      </div>
+      <div class="p-4 pb-28">
+        <h3 class="text-base font-semibold">${esc(it.title)}</h3>
+        <div class="mt-1 text-xs text-ink-500 flex items-center gap-2">
+          <i class="ri-map-pin-line"></i>${esc(it.city)} · ${it.distance}km
+          <span>·</span>
+          <span>${timeAgo(it.time)}</span>
+        </div>
+
+        <div class="mt-3 rounded-xl bg-mint-50 border border-mint-200 p-3">
+          <div class="text-xs text-mint-700 flex items-center gap-1"><i class="ri-loop-left-line"></i>求换</div>
+          <div class="text-sm font-medium text-mint-700 mt-1">${esc(it.want)}</div>
+        </div>
+
+        <div class="mt-3 text-sm text-ink-700 leading-relaxed">${esc(it.desc)}</div>
+
+        <div class="mt-4 flex items-center gap-3 p-3 rounded-xl bg-cream-100">
+          <img src="${it.owner.avatar}" class="w-10 h-10 rounded-full" />
+          <div>
+            <div class="text-sm font-medium">${esc(it.owner.name)}</div>
+            <div class="text-[11px] text-ink-500">首次发布于 ${timeAgo(it.time)}</div>
+          </div>
+          <span class="ml-auto badge bg-white text-ink-500"><i class="ri-shield-check-line mr-1"></i>实名</span>
+        </div>
+
+        <div class="mt-4 text-[11px] text-ink-500 flex items-start gap-1">
+          <i class="ri-shield-check-line mt-0.5"></i>
+          <span>交换请确认物品状态，建议同城当面交接～</span>
+        </div>
+      </div>
+
+      <div class="absolute left-0 right-0 bottom-0 p-3 bg-white/95 backdrop-blur border-t border-ink-300/30 flex gap-2">
+        <button class="btn-ghost flex-1" data-close><i class="ri-bookmark-line mr-1"></i>收藏</button>
+        <button id="detail-want" class="btn-primary flex-[2]"><i class="ri-hand-heart-line mr-1"></i>想要 · 发起沟通</button>
+      </div>
+    </div>
+  `);
+  document.querySelector('#detail-want').addEventListener('click', () => {
+    closeModal();
+    handleWant(id);
+  });
+}
